@@ -11,6 +11,7 @@ export interface PageHeroProps extends WithClassName {
   ctaSecondaryHref?: string
   reassurance?: string
   backgroundImage?: string
+  backgroundVideo?: string
 }
 
 export function PageHero({
@@ -22,17 +23,35 @@ export function PageHero({
   ctaSecondaryHref,
   reassurance,
   backgroundImage,
+  backgroundVideo,
   className,
 }: PageHeroProps) {
   return (
     <section
       className={cn(
-        'relative flex min-h-screen flex-col items-center justify-center text-center',
+        'relative flex min-h-screen flex-col items-center justify-center text-center overflow-hidden',
         className
       )}
     >
-      {/* Background */}
-      {backgroundImage && (
+      {/* Background video */}
+      {backgroundVideo && (
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+            poster={backgroundImage}
+          >
+            <source src={backgroundVideo} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-primary/60" />
+        </div>
+      )}
+
+      {/* Background image (fallback when no video) */}
+      {!backgroundVideo && backgroundImage && (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${backgroundImage})` }}
@@ -40,7 +59,7 @@ export function PageHero({
           <div className="absolute inset-0 bg-primary/70" />
         </div>
       )}
-      {!backgroundImage && <div className="absolute inset-0 bg-primary" />}
+      {!backgroundVideo && !backgroundImage && <div className="absolute inset-0 bg-primary" />}
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">

@@ -8,6 +8,8 @@ export interface HeroContent {
   ctaSecondary?: string
   ctaSecondaryHref?: string
   reassurance: string
+  backgroundVideo?: string
+  backgroundImage?: string
 }
 
 export interface SnapshotItem {
@@ -65,6 +67,8 @@ export interface TestimonialItem {
   name: string
   country: string
   date: string
+  platform?: 'google' | 'tripadvisor'
+  rating?: number
 }
 
 export interface TestimonialsContent {

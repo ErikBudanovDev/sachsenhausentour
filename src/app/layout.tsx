@@ -3,6 +3,7 @@ import { Inter, Playfair_Display, EB_Garamond } from 'next/font/google'
 import { siteConfig } from '@/config/site'
 import { Nav } from '@/components/layout/Nav'
 import { Footer } from '@/components/layout/Footer'
+import { WhatsAppButton } from '@/components/ui'
 import './globals.css'
 
 const inter = Inter({
@@ -54,6 +55,7 @@ export default function RootLayout({
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />
+        <WhatsAppButton />
       </body>
     </html>
   )

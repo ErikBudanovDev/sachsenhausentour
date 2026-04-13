@@ -1,4 +1,5 @@
-import { Clock, MapPin, Timer } from 'lucide-react'
+import Image from 'next/image'
+import { Clock, MapPin, Timer, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Section, Card } from '@/components/ui'
 import type { WithClassName } from '@/types'
@@ -13,6 +14,7 @@ export interface TrustBarProps extends WithClassName {
   rating: string
   reviewCount: string
   since: string
+  platforms: string[]
   snapshots: SnapshotItem[]
 }
 
@@ -22,24 +24,63 @@ const iconMap = {
   timer: Timer,
 }
 
+const platformLogos: Record<string, { src: string; alt: string }> = {
+  Google: { src: '/images/icons/google.svg', alt: 'Google Reviews' },
+  TripAdvisor: { src: '/images/icons/tripadvisor.svg', alt: 'TripAdvisor Reviews' },
+}
+
 export function TrustBar({
   rating,
   reviewCount,
   since,
+  platforms,
   snapshots,
   className,
 }: TrustBarProps) {
   return (
     <Section background="secondary" spacing="md" className={className}>
       {/* Social proof strip */}
-      <div className="mb-8 text-center">
-        <p className="text-sm text-text-muted tracking-wide">
-          <span className="text-accent font-semibold">{rating}</span>
-          {' on TripAdvisor '}
-          <span className="mx-2 text-secondary">|</span>
-          {reviewCount} reviews
-          <span className="mx-2 text-secondary">|</span>
-          Trusted since {since}
+      <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+        {/* Star rating */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className="h-5 w-5 fill-accent text-accent"
+              />
+            ))}
+          </div>
+          <span className="font-heading text-2xl font-bold text-accent">{rating}</span>
+        </div>
+
+        <span className="hidden sm:block text-text-muted/40">|</span>
+
+        {/* Platform logos */}
+        <div className="flex items-center gap-3">
+          {platforms.map((platform) => {
+            const logo = platformLogos[platform]
+            if (!logo) return null
+            return (
+              <div key={platform} className="flex items-center gap-1.5">
+                <Image
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={20}
+                  height={20}
+                  className="h-5 w-5"
+                />
+                <span className="text-sm text-text-muted">{platform}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        <span className="hidden sm:block text-text-muted/40">|</span>
+
+        {/* Review count */}
+        <p className="text-sm text-text-muted">
+          {reviewCount} reviews since {since}
         </p>
       </div>
 

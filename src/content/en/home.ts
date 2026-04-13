@@ -11,13 +11,15 @@ export const homeContent: HomeContent = {
     ctaSecondaryHref: '/tour',
     reassurance:
       'A respectful, educational experience \u2014 suitable for all visitors interested in understanding history.',
+    backgroundVideo: '/video/hero-bg.mp4',
+    backgroundImage: '/images/gallery/DSCF5931-min-scaled.jpg',
   },
 
   trustBar: {
-    rating: '4.9',
-    reviewCount: '2,400+',
+    rating: '4.8',
+    reviewCount: '320+',
     since: '2015',
-    platforms: ['TripAdvisor', 'Google'],
+    platforms: ['Google', 'TripAdvisor'],
     snapshots: [
       { label: 'Departure', value: 'Daily at 10:00 AM', icon: 'clock' },
       { label: 'Meeting Point', value: 'Berlin Alexanderplatz', icon: 'map-pin' },
@@ -106,31 +108,39 @@ export const homeContent: HomeContent = {
     items: [
       {
         quote:
-          'This was not just a tour \u2014 it was an education. Our guide brought the history to life with such depth and sensitivity. I left with a completely different understanding of what happened here.',
-        name: 'Sarah M.',
-        country: 'United Kingdom',
-        date: 'March 2026',
+          'Book this tour. We learned so much about Sachsenhausen concentration camp and the historical context of how it came about and why. Georgia, our guide, was great. She was so knowledgeable and made the experience truly meaningful.',
+        name: 'Chris R.',
+        country: 'Google Review',
+        date: 'June 2024',
+        platform: 'google',
+        rating: 5,
       },
       {
         quote:
-          'The level of knowledge our guide had was extraordinary. Every question was answered with care and detail. The pace was perfect \u2014 never rushed, always respectful.',
-        name: 'James K.',
-        country: 'Australia',
-        date: 'February 2026',
+          'Miguel is a fantastic guide with a real passion for 20th-century history. What I really liked was how he connected so many different parts of the story, giving us a broader understanding of how the world ended up on the path that led to the war.',
+        name: 'Filipe P.',
+        country: 'Google Review',
+        date: 'April 2025',
+        platform: 'google',
+        rating: 5,
       },
       {
         quote:
-          'I\u2019ve visited many memorials, but this experience stood apart. The train ride briefing set the context perfectly, and by the time we arrived, I was prepared for what I would see.',
-        name: 'Maria L.',
-        country: 'Spain',
-        date: 'January 2026',
+          'The tour guide went above and beyond in telling us stories about the history, political climate and historical events around the Holocaust and how they echo in today\u2019s world. You can tell he is truly well-read and passionate about justice.',
+        name: 'Wan Lin Q.',
+        country: 'Google Review',
+        date: 'August 2025',
+        platform: 'google',
+        rating: 5,
       },
       {
         quote:
-          'Worth every minute of the six hours. The guide didn\u2019t just tell us facts \u2014 they helped us understand the people behind the numbers. Deeply moving and important.',
-        name: 'Thomas W.',
-        country: 'Germany',
-        date: 'March 2026',
+          'Lewis was very knowledgeable and helpful with our group. His knowledge of the site memorial and history made this worth the trip and we highly recommend it. A very important site in history that everyone should experience.',
+        name: 'Justin D.',
+        country: 'Google Review',
+        date: 'August 2024',
+        platform: 'google',
+        rating: 5,
       },
     ],
   },

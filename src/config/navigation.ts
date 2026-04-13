@@ -17,6 +17,7 @@ export const footerNav = {
     { label: 'Photo Gallery', href: '/gallery' },
     { label: 'Blog', href: '/blog' },
     { label: 'About Us', href: '/about' },
+    { label: 'Book Your Tour', href: '/book' },
     { label: 'Contact', href: '/contact' },
   ] satisfies NavItem[],
   legal: [
