@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Colors — Sachsenhausen Design System */
+  --color-primary: #1A1A1A;
+  --color-secondary: #2D2D2D;
+  --color-accent: #C4A35A;
+  --color-accent-hover: #D4B36A;
+  --color-text: #F0EDE8;
+  --color-text-muted: #8A8580;
+  --color-urgent: #8B2500;
+  --color-surface: #141517;
+
+  /* Fonts */
+  --font-heading: var(--font-playfair-display), serif;
+  --font-body: var(--font-inter), sans-serif;
+  --font-accent: var(--font-eb-garamond), serif;
+
+  /* Transitions */
+  --transition-slow: 600ms ease-out;
+  --transition-medium: 400ms ease-out;
+  --transition-fast: 200ms ease-out;
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography base */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Selection color */
+::selection {
+  background-color: #C4A35A;
+  color: #1A1A1A;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #141517;
+}
+::-webkit-scrollbar-thumb {
+  background: #8A8580;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4A35A;
+}
