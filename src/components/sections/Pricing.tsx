@@ -2,11 +2,18 @@ import { Check, ShieldCheck } from 'lucide-react'
 import { Section, Button, Card } from '@/components/ui'
 import type { WithClassName } from '@/types'
 
+export interface PricingTier {
+  label: string
+  price: string
+  note?: string
+}
+
 export interface PricingProps extends WithClassName {
   heading: string
   price: string
   currency: string
   perPerson: string
+  tiers: PricingTier[]
   includes: string[]
   cancellation: string
   cta: string
@@ -18,6 +25,7 @@ export function Pricing({
   price,
   currency,
   perPerson,
+  tiers,
   includes,
   cancellation,
   cta,
@@ -33,6 +41,21 @@ export function Pricing({
           <p className="mt-2 font-heading text-5xl font-bold text-navy sm:text-6xl">
             {currency}{price}
           </p>
+
+          {/* Pricing tiers */}
+          <div className="mt-6 space-y-2">
+            {tiers.map((tier) => (
+              <div key={tier.label} className="flex items-center justify-between rounded-md bg-secondary px-4 py-2.5">
+                <div className="text-left">
+                  <span className="font-medium text-text">{tier.label}</span>
+                  {tier.note && (
+                    <span className="ml-2 text-xs text-text-muted">{tier.note}</span>
+                  )}
+                </div>
+                <span className="font-heading text-lg font-bold text-navy">{tier.price}</span>
+              </div>
+            ))}
+          </div>
 
           <ul className="mt-8 space-y-3 text-left">
             {includes.map((item) => (

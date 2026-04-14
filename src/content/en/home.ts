@@ -37,7 +37,7 @@ export const homeContent: HomeContent = {
       { value: '4.8★', label: 'Average Rating' },
       { value: '15,000+', label: 'Visitors Guided' },
       { value: '10+', label: 'Years of Experience' },
-      { value: '100%', label: 'Secure Booking' },
+      { value: '100%', label: 'Berlin-Based Guides' },
     ],
   },
 
@@ -55,8 +55,8 @@ export const homeContent: HomeContent = {
         description: 'Destination management collaboration ensuring seamless logistics for international groups and travel agencies.',
       },
       {
-        name: 'Be Original Tours',
-        description: 'Our parent company — a Berlin-based tour operator with a decade of experience in historically grounded tourism.',
+        name: 'Germany Retold',
+        description: 'A trusted voice in German heritage tourism — partnering with us to share historically accurate, ethically guided experiences.',
       },
     ],
   },
@@ -126,6 +126,9 @@ export const homeContent: HomeContent = {
       },
       {
         text: 'Ethical storytelling: we centre the experiences of prisoners and survivors, not the perpetrators.',
+      },
+      {
+        text: 'Transparent pricing with no hidden fees — student and group discounts available.',
       },
       {
         text: 'No rushed schedules — we allow time for reflection at key memorial sites including Station Z.',
@@ -248,6 +251,11 @@ export const homeContent: HomeContent = {
     price: '29',
     currency: '\u20AC',
     perPerson: 'Per Person',
+    tiers: [
+      { label: 'Adult', price: '\u20AC29', note: 'Standard rate' },
+      { label: 'Student', price: '\u20AC24', note: 'Valid student ID required' },
+      { label: 'Group (8+)', price: '\u20AC22', note: 'Per person, 8 or more guests' },
+    ],
     includes: [
       '6-hour guided memorial experience',
       'Expert historian guide',

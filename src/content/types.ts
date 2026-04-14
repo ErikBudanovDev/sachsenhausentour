@@ -170,11 +170,18 @@ export interface ComparisonContent {
   verdict: string
 }
 
+export interface PricingTier {
+  label: string
+  price: string
+  note?: string
+}
+
 export interface PricingContent {
   heading: string
   price: string
   currency: string
   perPerson: string
+  tiers: PricingTier[]
   includes: string[]
   cancellation: string
   cta: string
