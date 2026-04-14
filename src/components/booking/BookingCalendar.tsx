@@ -124,7 +124,7 @@ export function BookingCalendar({
         <button
           onClick={prevMonth}
           disabled={!canGoPrev}
-          className="rounded-sm p-2 text-text-muted transition-colors hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed"
+          className="rounded-md p-2 text-text-muted transition-colors hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -132,7 +132,7 @@ export function BookingCalendar({
         <h3 className="font-heading text-lg font-semibold">{monthLabel}</h3>
         <button
           onClick={nextMonth}
-          className="rounded-sm p-2 text-text-muted transition-colors hover:text-accent"
+          className="rounded-md p-2 text-text-muted transition-colors hover:text-accent"
           aria-label="Next month"
         >
           <ChevronRight className="h-5 w-5" />
@@ -168,7 +168,7 @@ export function BookingCalendar({
               onClick={() => !disabled && onSelectDate(date)}
               disabled={disabled}
               className={cn(
-                'flex h-10 w-full items-center justify-center rounded-sm text-sm transition-all duration-150',
+                'flex h-10 w-full items-center justify-center rounded-md text-sm transition-all duration-150',
                 disabled
                   ? 'cursor-not-allowed text-text-muted/30'
                   : 'cursor-pointer hover:bg-accent/20 text-text',

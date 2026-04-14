@@ -87,7 +87,7 @@ export function BookingWidget({
 
   return (
     <div className={cn(
-      'mx-auto w-full max-w-md rounded-sm border border-secondary bg-surface/80 p-6 backdrop-blur-sm',
+      'mx-auto w-full max-w-md rounded-md border border-border bg-surface p-6 shadow-sm',
       className
     )}>
       {/* Header */}
@@ -95,7 +95,7 @@ export function BookingWidget({
         {step !== 'date' && (
           <button
             onClick={goBack}
-            className="rounded-sm p-1 text-text-muted transition-colors hover:text-accent"
+            className="rounded-md p-1 text-text-muted transition-colors hover:text-accent"
             aria-label="Go back"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -154,7 +154,7 @@ export function BookingWidget({
       {step === 'confirm' && selectedDate && selectedSlotData && (
         <div className="space-y-5">
           {/* Summary */}
-          <div className="rounded-sm bg-primary/60 p-4 space-y-3">
+          <div className="rounded-md bg-secondary p-4 space-y-3">
             <div className="flex items-center gap-3">
               <CalendarDays className="h-4 w-4 text-accent" />
               <div>
@@ -175,14 +175,14 @@ export function BookingWidget({
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setGuests((g) => Math.max(1, g - 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-sm border border-secondary text-lg font-bold text-text transition-colors hover:border-accent"
+                className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-lg font-bold text-text transition-colors hover:border-accent"
               >
                 −
               </button>
               <span className="w-8 text-center font-heading text-xl font-bold">{guests}</span>
               <button
                 onClick={() => setGuests((g) => Math.min(20, g + 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-sm border border-secondary text-lg font-bold text-text transition-colors hover:border-accent"
+                className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-lg font-bold text-text transition-colors hover:border-accent"
               >
                 +
               </button>
@@ -190,7 +190,7 @@ export function BookingWidget({
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline justify-between border-t border-secondary pt-4">
+          <div className="flex items-baseline justify-between border-t border-border pt-4">
             <span className="text-sm text-text-muted">
               {guests} × €{price}
             </span>
@@ -203,7 +203,7 @@ export function BookingWidget({
               href={checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-sm bg-accent px-6 py-3.5 font-semibold text-primary transition-all duration-200 hover:shadow-lg hover:shadow-accent/20"
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-6 py-3.5 font-semibold text-primary transition-all duration-200 hover:shadow-lg hover:shadow-accent/20"
             >
               <ExternalLink className="h-4 w-4" />
               Book & Pay Online
@@ -212,7 +212,7 @@ export function BookingWidget({
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-sm border border-[#25D366] px-6 py-3 text-sm font-semibold text-[#25D366] transition-all duration-200 hover:bg-[#25D366]/10"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-[#25D366] px-6 py-3 text-sm font-semibold text-[#25D366] transition-all duration-200 hover:bg-[#25D366]/10"
             >
               <MessageCircle className="h-4 w-4" />
               Book via WhatsApp

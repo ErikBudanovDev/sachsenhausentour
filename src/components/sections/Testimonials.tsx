@@ -65,7 +65,7 @@ export function Testimonials({ heading, items, className }: TestimonialsProps) {
                 </div>
               )}
               <p className="mt-2 text-text leading-relaxed">{item.quote}</p>
-              <div className="mt-4 border-t border-secondary pt-4">
+              <div className="mt-4 border-t border-border pt-4">
                 <p className="font-semibold text-text">{item.name}</p>
                 <p className="text-xs text-text-muted">
                   {item.country} &middot; {item.date}

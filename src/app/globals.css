@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — Sachsenhausen Design System */
-  --color-primary: #1A1A1A;
-  --color-secondary: #2D2D2D;
-  --color-accent: #C4A35A;
-  --color-accent-hover: #D4B36A;
-  --color-text: #F0EDE8;
-  --color-text-muted: #8A8580;
-  --color-urgent: #8B2500;
-  --color-surface: #141517;
+  /* Colors — Navy Blue + Beige + Teal */
+  --color-primary: #F5F0EB;
+  --color-secondary: #EDE8E1;
+  --color-accent: #2A9D8F;
+  --color-accent-hover: #238577;
+  --color-navy: #1B2A4A;
+  --color-navy-light: #2C3E66;
+  --color-text: #1B2A4A;
+  --color-text-muted: #5C6A7E;
+  --color-surface: #FFFFFF;
+  --color-border: #D4CFC8;
+  --color-urgent: #C0392B;
 
   /* Fonts */
   --font-heading: var(--font-playfair-display), serif;
@@ -31,12 +34,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography base */
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.2;
+  color: var(--color-navy);
+  line-height: 1.15;
 }
 
 /* Reduced motion */
@@ -49,23 +52,23 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Selection color */
+/* Selection */
 ::selection {
-  background-color: #C4A35A;
-  color: #1A1A1A;
+  background-color: #2A9D8F;
+  color: #FFFFFF;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #141517;
+  background: #F5F0EB;
 }
 ::-webkit-scrollbar-thumb {
-  background: #8A8580;
-  border-radius: 4px;
+  background: #D4CFC8;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C4A35A;
+  background: #2A9D8F;
 }

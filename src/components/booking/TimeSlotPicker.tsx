@@ -40,10 +40,10 @@ export function TimeSlotPicker({
               onClick={() => slot.available && onSelectSlot(slot.id)}
               disabled={!slot.available}
               className={cn(
-                'flex items-center gap-3 rounded-sm border p-3 transition-all duration-150',
+                'flex items-center gap-3 rounded-md border p-3 transition-all duration-150',
                 slot.available
-                  ? 'cursor-pointer border-secondary hover:border-accent/60'
-                  : 'cursor-not-allowed border-secondary/50 opacity-40',
+                  ? 'cursor-pointer border-border hover:border-accent/60'
+                  : 'cursor-not-allowed border-border/50 opacity-40',
                 isSelected && slot.available && 'border-accent bg-accent/10'
               )}
             >

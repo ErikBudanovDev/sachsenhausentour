@@ -23,11 +23,13 @@ export function Nav() {
       <header
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-[var(--transition-medium)]',
-          scrolled ? 'bg-primary/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
+          scrolled
+            ? 'bg-surface/95 backdrop-blur-sm shadow-sm border-b border-border'
+            : 'bg-transparent'
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="font-heading text-xl font-bold tracking-wide text-text">
+          <Link href="/" className="font-heading text-xl font-bold tracking-wide text-navy">
             {siteConfig.name.toUpperCase()}
           </Link>
 
@@ -49,7 +51,7 @@ export function Nav() {
 
           {/* Mobile toggle */}
           <button
-            className="text-text md:hidden"
+            className="text-navy md:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
@@ -60,9 +62,9 @@ export function Nav() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] bg-primary/98 flex flex-col items-center justify-center gap-8">
+        <div className="fixed inset-0 z-[60] bg-surface flex flex-col items-center justify-center gap-8">
           <button
-            className="absolute top-4 right-4 text-text"
+            className="absolute top-4 right-4 text-navy"
             onClick={() => setMobileOpen(false)}
             aria-label="Close menu"
           >
@@ -72,7 +74,7 @@ export function Nav() {
             <Link
               key={item.href}
               href={item.href}
-              className="font-heading text-2xl text-text transition-colors hover:text-accent"
+              className="font-heading text-2xl text-navy transition-colors hover:text-accent"
               onClick={() => setMobileOpen(false)}
             >
               {item.label}

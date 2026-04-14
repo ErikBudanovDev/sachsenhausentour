@@ -72,7 +72,7 @@ export function TrustBar({
           <span className="font-heading text-2xl font-bold text-accent">{rating}</span>
         </div>
 
-        <span className="hidden sm:block text-text-muted/40">|</span>
+        <span className="hidden sm:block text-border">|</span>
 
         {/* Platform logos */}
         <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export function TrustBar({
           })}
         </div>
 
-        <span className="hidden sm:block text-text-muted/40">|</span>
+        <span className="hidden sm:block text-border">|</span>
 
         {/* Review count */}
         <p className="text-sm text-text-muted">

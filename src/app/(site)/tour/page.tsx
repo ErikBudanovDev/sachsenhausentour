@@ -20,10 +20,10 @@ export default function TourPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-primary/70" />
+        <div className="absolute inset-0 bg-navy/65" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="font-heading text-4xl font-bold sm:text-5xl">Tour Details</h1>
-          <p className="mt-4 text-lg text-text-muted">
+          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">Tour Details</h1>
+          <p className="mt-4 text-lg text-white/70">
             A full-day guided memorial experience from Berlin
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function TourPage() {
                 ['Languages', 'English (German and Spanish on select dates)'],
                 ['Price', '\u20AC29 per person'],
               ].map(([label, value]) => (
-                <div key={label} className="border-b border-secondary pb-3">
+                <div key={label} className="border-b border-border pb-3">
                   <dt className="text-xs font-medium uppercase tracking-widest text-accent">{label}</dt>
                   <dd className="mt-1 text-text">{value}</dd>
                 </div>

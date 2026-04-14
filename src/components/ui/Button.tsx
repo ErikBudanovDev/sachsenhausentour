@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { WithClassName } from '@/types'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'navy'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 export interface ButtonProps extends WithClassName {
@@ -16,11 +16,13 @@ export interface ButtonProps extends WithClassName {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent text-primary font-semibold hover:bg-accent-hover shadow-lg hover:shadow-accent/20',
+    'bg-accent text-white font-semibold hover:bg-accent-hover shadow-md hover:shadow-lg',
   secondary:
-    'border border-accent text-accent hover:bg-accent/10',
+    'border-2 border-accent text-accent hover:bg-accent hover:text-white',
   ghost:
     'text-accent hover:text-accent-hover hover:underline underline-offset-4',
+  navy:
+    'bg-navy text-white font-semibold hover:bg-navy-light shadow-md',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -40,7 +42,7 @@ export function Button({
   ariaLabel,
 }: ButtonProps) {
   const classes = cn(
-    'inline-flex items-center justify-center rounded-sm transition-all duration-[var(--transition-medium)] font-body tracking-wide',
+    'inline-flex items-center justify-center rounded-md transition-all duration-[var(--transition-medium)] font-body tracking-wide',
     variantStyles[variant],
     sizeStyles[size],
     disabled && 'opacity-50 cursor-not-allowed pointer-events-none',

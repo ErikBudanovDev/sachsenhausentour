@@ -1,20 +1,22 @@
 import type { HomeContent } from '../types'
 
 export const homeContent: HomeContent = {
+  /* ─── 1. Hero Section (Above Fold) ─── */
   hero: {
-    title: 'Walk Through History. Understand the Past.',
+    title: 'Sachsenhausen Tour from Berlin – Expert Guided Memorial Visit',
     subtitle:
-      'A guided 6-hour journey from Berlin to Sachsenhausen Memorial, led by historians trained in Holocaust education.',
-    cta: 'Book Your Tour',
+      'Join a historian-led 6-hour journey from Berlin to Sachsenhausen Memorial. Small groups, deep context, and a respectful approach to one of history\u2019s most important sites.',
+    cta: 'Book Your Tour — \u20AC29',
     ctaHref: '/book',
-    ctaSecondary: 'Learn More',
+    ctaSecondary: 'See Tour Details',
     ctaSecondaryHref: '/tour',
     reassurance:
-      'A respectful, educational experience \u2014 suitable for all visitors interested in understanding history.',
+      'Free cancellation up to 24 hours before departure. Secure booking.',
     backgroundVideo: '/video/hero-bg.mp4',
     backgroundImage: '/images/gallery/DSCF5931-min-scaled.jpg',
   },
 
+  /* ─── 2. Tour Highlights (Snapshot strip) ─── */
   trustBar: {
     rating: '4.8',
     reviewCount: '320+',
@@ -23,88 +25,244 @@ export const homeContent: HomeContent = {
     snapshots: [
       { label: 'Departure', value: 'Daily at 10:00 AM', icon: 'clock' },
       { label: 'Meeting Point', value: 'Berlin Alexanderplatz', icon: 'map-pin' },
-      { label: 'Duration', value: '6 Hours', icon: 'timer' },
+      { label: 'Duration', value: '6 Hours Round-Trip', icon: 'timer' },
     ],
   },
 
-  timeline: {
-    heading: 'What You Will Experience',
-    stops: [
+  /* ─── 3. Trusted Sachsenhausen Tours Berlin ─── */
+  trustStats: {
+    heading: 'Trusted Sachsenhausen Tours Berlin',
+    subheading: 'Numbers that reflect our commitment to quality and education.',
+    stats: [
+      { value: '4.8★', label: 'Average Rating' },
+      { value: '15,000+', label: 'Visitors Guided' },
+      { value: '10+', label: 'Years of Experience' },
+      { value: '100%', label: 'Secure Booking' },
+    ],
+  },
+
+  /* ─── 4. Partner / Trusted By Section ─── */
+  trustedBy: {
+    heading: 'Recognised & Trusted',
+    subheading: 'We partner with leading Berlin tourism organisations to deliver the highest standard of guided memorial experiences.',
+    partners: [
       {
-        title: 'The Journey North',
-        description:
-          'We travel together by train from Berlin, using the 35-kilometre journey to introduce the historical context of the camp\u2019s creation in 1936 and its role within the Nazi concentration camp system.',
+        name: 'Visit Berlin',
+        description: 'Official Berlin tourism partner — listed as a recommended cultural experience for visitors to the German capital.',
       },
       {
-        title: 'The Entrance Gate',
-        description:
-          'Standing before the gate inscribed with \u201CArbeit Macht Frei,\u201D your guide explains the calculated cruelty behind the slogan and what prisoners faced upon arrival.',
+        name: 'Gateway Berlin DMC',
+        description: 'Destination management collaboration ensuring seamless logistics for international groups and travel agencies.',
       },
       {
-        title: 'Prisoner Barracks',
-        description:
-          'Inside the reconstructed barracks, we explore the daily reality of camp life \u2014 the overcrowding, the hierarchy imposed among prisoners, and the strategies people used to survive.',
-      },
-      {
-        title: 'Punishment Cells',
-        description:
-          'The isolation cells reveal the systematic use of punishment as a tool of terror. Your guide provides context for understanding these methods within the broader system of repression.',
-      },
-      {
-        title: 'Station Z',
-        description:
-          'At the former execution site, we pause to reflect on the thousands who lost their lives here. This is a moment for quiet contemplation and understanding.',
-      },
-      {
-        title: 'Memorial and Reflection',
-        description:
-          'We conclude at the memorial, discussing how Sachsenhausen is remembered today, its significance in Holocaust education, and the importance of bearing witness to history.',
+        name: 'Be Original Tours',
+        description: 'Our parent company — a Berlin-based tour operator with a decade of experience in historically grounded tourism.',
       },
     ],
   },
 
+  /* ─── 5. Why Visit Sachsenhausen from Berlin? ─── */
+  whyVisit: {
+    heading: 'Why Visit Sachsenhausen from Berlin?',
+    paragraphs: [
+      'Sachsenhausen concentration camp, located just 35 kilometres north of Berlin in Oranienburg, was one of the first major camps established by the Nazi regime in 1936. It served as a model for the entire concentration camp system and as a training ground for SS officers who went on to run camps across Europe.',
+      'Visiting Sachsenhausen is not just about seeing a historical site — it is about understanding the mechanisms of state-organised terror, the experiences of over 200,000 prisoners, and the lessons that remain vital for our world today.',
+      'As a day trip from Berlin, Sachsenhausen offers an accessible yet profoundly impactful experience. With expert guidance, visitors can grasp the full historical context that a self-guided visit simply cannot provide.',
+    ],
+    highlights: [
+      {
+        title: 'Historical Significance',
+        text: 'The "model camp" that shaped the entire Nazi concentration camp system — understanding Sachsenhausen means understanding the Holocaust.',
+      },
+      {
+        title: 'Proximity to Berlin',
+        text: 'Only 35 km north of Berlin, reachable by S-Bahn in under an hour. A meaningful day trip that fits any Berlin itinerary.',
+      },
+      {
+        title: 'Educational Depth',
+        text: 'With a trained historian, you will understand not just what happened, but why — the political, social, and human forces at work.',
+      },
+    ],
+  },
+
+  /* ─── 6. How to Get to Sachsenhausen from Berlin ─── */
+  howToGet: {
+    heading: 'How to Get to Sachsenhausen from Berlin',
+    intro: 'The Sachsenhausen Memorial is well-connected to central Berlin by public transport.',
+    distance: '35 km from Berlin city centre — approximately 50 minutes by train',
+    options: [
+      {
+        method: 'Train',
+        duration: '~50 minutes',
+        description: 'Take the S1 line from Friedrichstraße to Oranienburg, then a 20-minute walk to the memorial. Our guided tour includes the train journey with historical commentary along the way.',
+        recommended: true,
+      },
+      {
+        method: 'Car',
+        duration: '~40 minutes',
+        description: 'Drive north on the A111/B96. Free parking is available near the memorial. Note: parking can be limited during peak season.',
+      },
+      {
+        method: 'On foot',
+        duration: '20 min from station',
+        description: 'From Oranienburg S-Bahn station, follow the marked route through the town to the memorial entrance.',
+      },
+    ],
+    guidedNote: 'Our guided tour departs from Berlin Alexanderplatz and handles all transport logistics. Your guide provides historical context during the journey, turning the commute into the first chapter of the experience.',
+  },
+
+  /* ─── 7. Why Choose Our Tour? ─── */
   whyBook: {
-    heading: 'Why Choose This Tour',
+    heading: 'Why Choose Our Sachsenhausen Tour?',
     differentiators: [
       {
-        text: 'Led by historians trained specifically in Holocaust education \u2014 not general tour guides.',
+        text: 'Led by historians trained specifically in Holocaust education — not general tour guides reading from a script.',
       },
       {
-        text: 'We focus on context and understanding, not just locations. You\u2019ll leave knowing the \u201Cwhy,\u201D not just the \u201Cwhat.\u201D',
+        text: 'Small group sizes (max 20) ensure a personal, respectful experience where every question is heard.',
       },
       {
-        text: 'No rushed schedules. We allow time for reflection at key memorial sites.',
+        text: 'We focus on context and understanding. You\u2019ll leave knowing the \u201Cwhy,\u201D not just the \u201Cwhat.\u201D',
       },
       {
-        text: 'Small groups ensure a personal, respectful experience where every question matters.',
+        text: 'Ethical storytelling: we centre the experiences of prisoners and survivors, not the perpetrators.',
       },
       {
-        text: 'Free cancellation up to 24 hours before departure. No questions asked.',
+        text: 'No rushed schedules — we allow time for reflection at key memorial sites including Station Z.',
+      },
+      {
+        text: 'Free cancellation up to 24 hours before departure. No questions asked, full refund.',
       },
     ],
     priceAnchor:
-      'An expert-led, full-day memorial experience at an accessible price.',
+      'An expert-led, full-day memorial experience for just \u20AC29 per person.',
   },
 
-  qualifier: {
-    heading: 'Is This Tour Right for You?',
-    items: [
-      { text: 'You are interested in history and want a deeper understanding of the Holocaust.', positive: true },
-      { text: 'You value expert context and thoughtful narration over surface-level sightseeing.', positive: true },
-      { text: 'You appreciate an unhurried pace with time for reflection at meaningful sites.', positive: true },
-      { text: 'This is not a casual sightseeing trip \u2014 it is an educational memorial experience.', positive: false },
+  /* ─── 8. Meet Your Guide ─── */
+  meetGuide: {
+    heading: 'Meet Your Guide',
+    name: 'The Sachsenhausen Tour Team',
+    credentials: 'Historians & Holocaust Educators | Berlin-based since 2015',
+    bio: [
+      'Our guides are not general tour leaders — they are trained historians with deep expertise in 20th-century European history, the Holocaust, and memorial education. Each guide brings years of study and a genuine commitment to preserving memory through education.',
+      'We believe that the way a story is told matters as much as the story itself. Our approach centres the human experiences of prisoners and survivors, providing context without sensationalism and depth without overwhelm.',
+    ],
+    image: '/images/gallery/DSCF6098-scaled.jpg',
+    quote: 'Our goal is not just to show you Sachsenhausen — it\u2019s to help you understand the human stories behind the walls.',
+  },
+
+  /* ─── 9. Sachsenhausen Tour Itinerary ─── */
+  timeline: {
+    heading: 'Sachsenhausen Tour Itinerary',
+    stops: [
+      {
+        title: 'Departure from Berlin',
+        description:
+          'We meet at Generator Berlin Alexanderplatz at 10:00 AM. On the train to Oranienburg, your guide introduces the political climate of 1930s Germany and the origins of the camp system.',
+      },
+      {
+        title: 'Arrival & Camp Entrance',
+        description:
+          'Walking through Oranienburg, we discuss the town\u2019s relationship with the camp. At the gate inscribed \u201CArbeit Macht Frei,\u201D your guide explains the calculated cruelty behind the slogan.',
+      },
+      {
+        title: 'Roll Call Area & Tower A',
+        description:
+          'The vast roll call area and the commandant\u2019s watchtower reveal the camp\u2019s geometry of control — designed to dehumanise and dominate through architecture itself.',
+      },
+      {
+        title: 'Prisoner Barracks & Daily Life',
+        description:
+          'Inside the reconstructed barracks, we explore overcrowding, the prisoner hierarchy, and the strategies people used to survive. Your guide shares individual stories that bring the history to life.',
+      },
+      {
+        title: 'Punishment Cells & Station Z',
+        description:
+          'The isolation cells and the former execution site (Station Z) represent the most harrowing part of the tour. We pause here for quiet contemplation and reflection.',
+      },
+      {
+        title: 'Memorial, Reflection & Return',
+        description:
+          'We conclude at the Soviet memorial, discussing liberation, memory, and the site\u2019s significance today. We return to Berlin by approximately 4:00 PM.',
+      },
     ],
   },
 
-  guideVoice: {
-    quote:
-      'As guides, our goal is not just to show you Sachsenhausen \u2014 it\u2019s to help you understand the human stories behind the walls. Every tour is different, because every group brings their own questions, their own perspective, and their own reasons for wanting to learn.',
-    name: 'Tour Guide Team',
-    role: 'Sachsenhausen Tour Historians',
+  /* ─── 10. What's Included / Not Included ─── */
+  whatsIncluded: {
+    heading: 'What\u2019s Included in Your Tour',
+    items: [
+      { text: 'Expert historian guide for the full 6-hour experience', included: true },
+      { text: 'Historical commentary during the train journey', included: true },
+      { text: 'Guided tour of all major memorial sites', included: true },
+      { text: 'Small group size (max 20 participants)', included: true },
+      { text: 'Free cancellation up to 24 hours before', included: true },
+      { text: 'Train tickets (AB+C zone ticket required)', included: false },
+      { text: 'Food and drinks', included: false },
+      { text: 'Hotel pickup and drop-off', included: false },
+    ],
   },
 
+  /* ─── 11. Why Our Tour is Better (Comparison) ─── */
+  comparison: {
+    heading: 'Guided Tour vs. Self-Guided Visit',
+    subheading: 'Understanding the difference can help you choose the right experience.',
+    rows: [
+      {
+        feature: 'Historical Context',
+        guided: 'Full narrative by a trained historian',
+        selfGuided: 'Audio guide or printed brochure',
+      },
+      {
+        feature: 'Individual Stories',
+        guided: 'Personal accounts of prisoners & survivors',
+        selfGuided: 'Limited to display panels',
+      },
+      {
+        feature: 'Questions & Discussion',
+        guided: 'Ask anything, get expert answers',
+        selfGuided: 'No expert available on-site',
+      },
+      {
+        feature: 'Transport from Berlin',
+        guided: 'Guided journey with commentary',
+        selfGuided: 'Navigate on your own',
+      },
+      {
+        feature: 'Duration',
+        guided: '6 hours including travel',
+        selfGuided: 'Varies — easy to miss key sites',
+      },
+      {
+        feature: 'Emotional Support',
+        guided: 'Sensitive pacing with reflection time',
+        selfGuided: 'Self-managed experience',
+      },
+    ],
+    verdict: 'A guided tour transforms a visit into a deep, meaningful understanding of history.',
+  },
+
+  /* ─── 12. Pricing & Booking ─── */
+  pricing: {
+    heading: 'Pricing & Booking',
+    price: '29',
+    currency: '\u20AC',
+    perPerson: 'Per Person',
+    includes: [
+      '6-hour guided memorial experience',
+      'Expert historian guide',
+      'Small group (max 20)',
+      'Free cancellation — 24 hours notice',
+      'Daily departure at 10:00 AM',
+    ],
+    cancellation: 'Free cancellation up to 24 hours before departure',
+    cta: 'Book Your Tour Now',
+    ctaHref: '/book',
+  },
+
+  /* ─── 13. Testimonials ─── */
   testimonials: {
-    heading: 'What Visitors Say',
+    heading: 'What Visitors Say About Our Sachsenhausen Tour',
     items: [
       {
         quote:
@@ -145,17 +303,95 @@ export const homeContent: HomeContent = {
     ],
   },
 
+  /* ─── 14. FAQs ─── */
+  faq: {
+    heading: 'Frequently Asked Questions',
+    items: [
+      {
+        question: 'How long is the Sachsenhausen tour from Berlin?',
+        answer: 'The full experience takes approximately 6 hours, including the train journey from Berlin Alexanderplatz to Oranienburg and back. You will spend around 3.5 hours at the memorial site itself.',
+      },
+      {
+        question: 'How do we get to Sachsenhausen from Berlin?',
+        answer: 'We travel together by S-Bahn (S1 line) from central Berlin. The journey takes about 50 minutes each way. Your guide provides historical context during the train ride, making it part of the experience.',
+      },
+      {
+        question: 'Is the tour suitable for children?',
+        answer: 'The tour is educational and respectful in tone. We recommend it for visitors aged 14 and above. Younger children may attend at the discretion of their guardians.',
+      },
+      {
+        question: 'What should I wear and bring?',
+        answer: 'Wear comfortable walking shoes and weather-appropriate clothing. Bring water, a snack, and a valid ABC zone transit ticket. The memorial grounds are largely outdoors, so rain gear is recommended in autumn and spring.',
+      },
+      {
+        question: 'What is the cancellation policy?',
+        answer: 'Free cancellation up to 24 hours before the tour departure time. No questions asked — you will receive a full refund.',
+      },
+      {
+        question: 'Is the memorial site accessible?',
+        answer: 'The memorial grounds are largely flat and wheelchair accessible. Some original structures have uneven surfaces. Please contact us in advance if you have specific accessibility needs and we will do our best to accommodate.',
+      },
+      {
+        question: 'Do I need to buy a separate train ticket?',
+        answer: 'Yes, a Berlin ABC zone ticket is required for the S-Bahn journey. This is not included in the tour price. Your guide will help you with ticket purchase if needed.',
+      },
+      {
+        question: 'What happens if it rains?',
+        answer: 'The tour runs rain or shine. Much of the experience is outdoors, so we recommend dressing appropriately. The history doesn\u2019t change with the weather — and some visitors find that quieter, overcast days add to the reflective atmosphere.',
+      },
+    ],
+  },
+
+  /* ─── 15. About the Company ─── */
+  aboutCompany: {
+    heading: 'About Sachsenhausen Tour',
+    paragraphs: [
+      'Sachsenhausen Tour is operated by Be Original Tours, a Berlin-based tour company founded in 2015. We specialise in historically grounded, ethically led memorial experiences that prioritise education, respect, and understanding.',
+      'Over the past decade, we have guided more than 15,000 visitors through Sachsenhausen Memorial — from students and educators to families and solo travellers from around the world. Our team of trained historians brings academic rigour and genuine passion to every tour.',
+    ],
+    founded: '2015',
+    mission: 'To preserve memory through education, helping visitors understand not just what happened at Sachsenhausen, but why it matters today.',
+  },
+
+  /* ─── 16. Emotional Closing Section ─── */
+  emotionalClose: {
+    heading: 'Why This Visit Matters',
+    text: 'Sachsenhausen is not just a place to visit — it is a place to understand. The stories held within these walls belong to over 200,000 people who were imprisoned here. By visiting with care and context, you honour their memory and carry their stories forward.',
+    attribution: 'The Sachsenhausen Tour Team',
+  },
+
+  /* ─── 17. Final CTA ─── */
+  finalCta: {
+    heading: 'Ready to Experience History?',
+    subheading: 'Daily departures from Berlin. Small groups. Expert historians. \u20AC29 per person.',
+    cta: 'Book Your Tour Now',
+    ctaHref: '/book',
+    ctaSecondary: 'Ask a Question via WhatsApp',
+    ctaSecondaryHref: '/contact',
+    urgencyNote: 'Tours fill up quickly during peak season — secure your spot today.',
+  },
+
+  /* ─── Legacy sections (kept for backward compat) ─── */
+  qualifier: {
+    heading: 'Is This Tour Right for You?',
+    items: [
+      { text: 'You are interested in history and want a deeper understanding of the Holocaust.', positive: true },
+      { text: 'You value expert context and thoughtful narration over surface-level sightseeing.', positive: true },
+      { text: 'You appreciate an unhurried pace with time for reflection at meaningful sites.', positive: true },
+      { text: 'This is not a casual sightseeing trip — it is an educational memorial experience.', positive: false },
+    ],
+  },
+
+  guideVoice: {
+    quote:
+      'As guides, our goal is not just to show you Sachsenhausen — it\u2019s to help you understand the human stories behind the walls.',
+    name: 'Tour Guide Team',
+    role: 'Sachsenhausen Tour Historians',
+  },
+
   blogPreview: {
     heading: 'From Our Journal',
     cta: 'Read More',
     ctaHref: '/blog',
-  },
-
-  finalCta: {
-    heading: 'Ready to Experience History?',
-    cta: 'Book Your Tour',
-    ctaHref: '/book',
-    ctaSecondary: 'Ask a Question',
-    ctaSecondaryHref: '/contact',
   },
 }

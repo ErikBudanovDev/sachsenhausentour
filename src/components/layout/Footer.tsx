@@ -5,15 +5,15 @@ import { Container } from '@/components/ui'
 
 export function Footer() {
   return (
-    <footer className="bg-surface border-t border-secondary">
+    <footer className="bg-navy text-white/80">
       <Container className="py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-1">
-            <p className="font-heading text-lg font-bold tracking-wide text-text">
+            <p className="font-heading text-lg font-bold tracking-wide text-white">
               {siteConfig.name.toUpperCase()}
             </p>
-            <p className="mt-2 text-sm text-text-muted leading-relaxed">
+            <p className="mt-2 text-sm leading-relaxed text-white/60">
               A respectful, educational journey through one of history&apos;s most significant memorial sites.
             </p>
           </div>
@@ -28,7 +28,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-text-muted transition-colors hover:text-accent"
+                    className="text-sm text-white/60 transition-colors hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -42,7 +42,7 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent">
               Contact
             </h3>
-            <ul className="space-y-2 text-sm text-text-muted">
+            <ul className="space-y-2 text-sm text-white/60">
               <li>
                 <a
                   href={`mailto:${siteConfig.email}`}
@@ -74,7 +74,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-text-muted transition-colors hover:text-accent"
+                    className="text-sm text-white/60 transition-colors hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -84,7 +84,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-secondary pt-8 text-center text-xs text-text-muted">
+        <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs text-white/40">
           &copy; {new Date().getFullYear()} {siteConfig.name} &mdash; A Be Original Tours Experience
         </div>
       </Container>

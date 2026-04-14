@@ -51,7 +51,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${playfair.variable} ${garamond.variable}`}
     >
-      <body className="min-h-screen flex flex-col bg-primary text-text font-body">
+      <body className="min-h-screen flex flex-col bg-primary text-navy font-body">
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -39,10 +39,10 @@ function TimelineItem({ stop, index }: { stop: TimelineStop; index: number }) {
       )}
     >
       {/* Connector line */}
-      <div className="absolute left-[11px] top-0 bottom-0 w-px bg-secondary last:hidden" />
+      <div className="absolute left-[11px] top-0 bottom-0 w-px bg-border last:hidden" />
 
       {/* Dot */}
-      <div className="absolute left-0 top-1 h-[23px] w-[23px] rounded-full border-2 border-accent bg-primary" />
+      <div className="absolute left-0 top-1 h-[23px] w-[23px] rounded-full border-2 border-accent bg-surface" />
 
       {/* Content */}
       <div>

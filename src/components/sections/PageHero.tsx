@@ -46,7 +46,7 @@ export function PageHero({
           >
             <source src={backgroundVideo} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-primary/60" />
+          <div className="absolute inset-0 bg-navy/60" />
         </div>
       )}
 
@@ -56,17 +56,17 @@ export function PageHero({
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${backgroundImage})` }}
         >
-          <div className="absolute inset-0 bg-primary/70" />
+          <div className="absolute inset-0 bg-navy/65" />
         </div>
       )}
-      {!backgroundVideo && !backgroundImage && <div className="absolute inset-0 bg-primary" />}
+      {!backgroundVideo && !backgroundImage && <div className="absolute inset-0 bg-navy" />}
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
-        <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+        <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
           {title}
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted sm:text-xl">
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70 sm:text-xl">
           {subtitle}
         </p>
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -74,7 +74,7 @@ export function PageHero({
             {cta}
           </Button>
           {ctaSecondary && ctaSecondaryHref && (
-            <Button href={ctaSecondaryHref} variant="secondary" size="lg">
+            <Button href={ctaSecondaryHref} variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
               {ctaSecondary}
             </Button>
           )}
@@ -83,8 +83,8 @@ export function PageHero({
 
       {/* Reassurance strip */}
       {reassurance && (
-        <div className="relative z-10 mt-16 w-full border-t border-secondary/50 bg-primary/50 backdrop-blur-sm">
-          <p className="py-4 text-center text-sm text-text-muted italic font-accent">
+        <div className="relative z-10 mt-16 w-full border-t border-white/10 bg-navy/40 backdrop-blur-sm">
+          <p className="py-4 text-center text-sm text-white/60 italic font-accent">
             {reassurance}
           </p>
         </div>
@@ -92,7 +92,7 @@ export function PageHero({
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-        <div className="h-8 w-5 rounded-full border-2 border-text-muted/50 p-1">
+        <div className="h-8 w-5 rounded-full border-2 border-white/30 p-1">
           <div className="h-2 w-1 mx-auto rounded-full bg-accent" />
         </div>
       </div>
