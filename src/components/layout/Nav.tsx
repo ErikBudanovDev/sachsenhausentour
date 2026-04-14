@@ -29,7 +29,13 @@ export function Nav() {
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="font-heading text-xl font-bold tracking-wide text-navy">
+          <Link
+            href="/"
+            className={cn(
+              'font-heading text-xl font-bold tracking-wide transition-colors',
+              scrolled ? 'text-navy' : 'text-white'
+            )}
+          >
             {siteConfig.name.toUpperCase()}
           </Link>
 
@@ -39,7 +45,10 @@ export function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-text-muted transition-colors hover:text-accent"
+                className={cn(
+                  'text-sm font-medium transition-colors hover:text-accent',
+                  scrolled ? 'text-text-muted' : 'text-white/80 hover:text-white'
+                )}
               >
                 {item.label}
               </Link>
@@ -51,7 +60,7 @@ export function Nav() {
 
           {/* Mobile toggle */}
           <button
-            className="text-navy md:hidden"
+            className={cn('md:hidden transition-colors', scrolled ? 'text-navy' : 'text-white')}
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
