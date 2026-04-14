@@ -316,6 +316,10 @@ export const homeContent: HomeContent = {
     heading: 'Frequently Asked Questions',
     items: [
       {
+        question: 'Do you need tickets for Sachsenhausen concentration camp?',
+        answer: 'Entry to the Sachsenhausen Memorial is free — no tickets are required. However, if you want a guided experience with expert historical commentary, you can book a guided tour from Berlin starting at \u20AC29 per person. Our tour includes a trained historian, small group size, and transport guidance from central Berlin.',
+      },
+      {
         question: 'How long is the Sachsenhausen tour from Berlin?',
         answer: 'The full experience takes approximately 6 hours, including the train journey from Berlin Alexanderplatz to Oranienburg and back. You will spend around 3.5 hours at the memorial site itself.',
       },

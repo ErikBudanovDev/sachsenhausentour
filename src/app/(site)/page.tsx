@@ -17,6 +17,7 @@ import { FAQ } from '@/components/sections/FAQ'
 import { AboutCompany } from '@/components/sections/AboutCompany'
 import { EmotionalClose } from '@/components/sections/EmotionalClose'
 import { FinalCta } from '@/components/sections/FinalCta'
+import { FAQSchema } from '@/components/seo/FAQSchema'
 
 export const metadata: Metadata = {
   title: 'Sachsenhausen Tour from Berlin – Expert Guided Memorial Visit | €29',
@@ -77,6 +78,9 @@ export default function HomePage() {
 
       {/* 17. Final CTA */}
       <FinalCta {...homeContent.finalCta} />
+
+      {/* Structured Data */}
+      <FAQSchema items={homeContent.faq.items} />
     </>
   )
 }
