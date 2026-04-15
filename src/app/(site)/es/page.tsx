@@ -6,12 +6,14 @@ import {
   Users,
   Euro,
   Check,
-  Star,
   MessageCircle,
   ShieldCheck,
   ChevronRight,
 } from 'lucide-react'
 import { Section, Button, Card, Accordion } from '@/components/ui'
+import { ReviewSlider } from '@/components/sections/ReviewSlider'
+import type { Review } from '@/components/sections/ReviewSlider'
+import reviewsData from '@/content/reviews.json'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { siteConfig } from '@/config/site'
 
@@ -239,29 +241,14 @@ export default function SpanishLandingPage() {
         </div>
       </Section>
 
-      {/* Reviews */}
-      <Section spacing="lg">
-        <h2 className="mb-10 text-center font-heading text-3xl font-bold sm:text-4xl">Lo Que Dicen Nuestros Visitantes</h2>
-        <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-          {[
-            { quote: 'Reserven este tour. Aprendimos mucho sobre el campo de concentración de Sachsenhausen y el contexto histórico. Georgia, nuestra guía, fue increíble.', name: 'Chris R.', date: 'Junio 2024' },
-            { quote: 'Miguel es un guía fantástico con una verdadera pasión por la historia del siglo XX. Conectó muchas partes diferentes de la historia, dándonos una comprensión más amplia.', name: 'Filipe P.', date: 'Abril 2025' },
-          ].map((review) => (
-            <Card key={review.name} padding="lg" hoverable>
-              <div className="flex gap-0.5 mb-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-accent text-accent" />
-                ))}
-              </div>
-              <p className="text-text leading-relaxed">{review.quote}</p>
-              <div className="mt-4 border-t border-border pt-3">
-                <p className="font-semibold text-text">{review.name}</p>
-                <p className="text-xs text-text-muted">Google Review &middot; {review.date}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
+      {/* Reviews — real Google reviews from MongoDB */}
+      <ReviewSlider
+        heading="Lo Que Dicen Nuestros Visitantes"
+        subheading="Reseñas verificadas de visitantes en Google."
+        reviews={reviewsData as Review[]}
+        avgRating="4.8"
+        totalReviews="320+"
+      />
 
       {/* FAQ */}
       <Section background="surface" spacing="lg">

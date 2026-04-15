@@ -12,8 +12,10 @@ import { Timeline } from '@/components/sections/Timeline'
 import { WhatsIncluded } from '@/components/sections/WhatsIncluded'
 import { Comparison } from '@/components/sections/Comparison'
 import { Pricing } from '@/components/sections/Pricing'
-import { Testimonials } from '@/components/sections/Testimonials'
+import { ReviewSlider } from '@/components/sections/ReviewSlider'
+import type { Review } from '@/components/sections/ReviewSlider'
 import { FAQ } from '@/components/sections/FAQ'
+import reviewsData from '@/content/reviews.json'
 import { AboutCompany } from '@/components/sections/AboutCompany'
 import { EmotionalClose } from '@/components/sections/EmotionalClose'
 import { FinalCta } from '@/components/sections/FinalCta'
@@ -64,8 +66,14 @@ export default function HomePage() {
       {/* 12. Pricing & Booking */}
       <Pricing {...homeContent.pricing} />
 
-      {/* 13. Testimonials */}
-      <Testimonials {...homeContent.testimonials} />
+      {/* 13. Reviews — real Google reviews from MongoDB */}
+      <ReviewSlider
+        heading="What Visitors Say About Our Sachsenhausen Tour"
+        subheading="Real reviews from verified visitors on Google."
+        reviews={reviewsData as Review[]}
+        avgRating="4.8"
+        totalReviews="320+"
+      />
 
       {/* 14. FAQs */}
       <FAQ {...homeContent.faq} />
