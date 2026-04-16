@@ -62,7 +62,7 @@ export function MobileBookingBar() {
           </a>
 
           <a
-            href="/book"
+            href="/book#booking"
             className="shrink-0 rounded-md bg-accent px-5 py-2.5 font-heading text-sm font-bold text-white shadow-md transition-all active:scale-95 hover:bg-accent-hover"
           >
             Book Now!

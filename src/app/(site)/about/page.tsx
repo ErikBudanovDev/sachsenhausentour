@@ -275,7 +275,7 @@ export default function AboutPage() {
             </p>
             <div className="mt-6 flex gap-4">
               <Button href="/contact" variant="secondary">Get in Touch</Button>
-              <Button href="/book" variant="primary">Book a Tour</Button>
+              <Button href="/book#booking" variant="primary">Book a Tour</Button>
             </div>
           </div>
           <div className="overflow-hidden rounded-md">

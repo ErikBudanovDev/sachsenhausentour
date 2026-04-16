@@ -170,7 +170,7 @@ export default function ConcentrationCampBerlinPost() {
               Daily departures from Berlin. 6-hour guided experience. &euro;29 per person.
             </p>
             <div className="mt-6">
-              <Button href="/book" size="lg">Book Your Tour</Button>
+              <Button href="/book#booking" size="lg">Book Your Tour</Button>
             </div>
           </div>
 

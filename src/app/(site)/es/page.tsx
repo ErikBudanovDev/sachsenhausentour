@@ -104,7 +104,7 @@ export default function SpanishLandingPage() {
             Únete a un recorrido de 6 horas dirigido por historiadores desde Berlín al Memorial de Sachsenhausen. Grupos pequeños, contexto profundo y un enfoque respetuoso.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button href="/book" size="lg">Reservar Tour — €29</Button>
+            <Button href="/book#booking" size="lg">Reservar Tour — €29</Button>
             <Button href={whatsappHref} variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
               <MessageCircle className="mr-2 h-5 w-5" />
               WhatsApp
@@ -232,7 +232,7 @@ export default function SpanishLandingPage() {
               ))}
             </ul>
             <div className="mt-6">
-              <Button href="/book" size="lg" className="w-full">Reservar Ahora</Button>
+              <Button href="/book#booking" size="lg" className="w-full">Reservar Ahora</Button>
             </div>
             <div className="mt-3 flex items-center justify-center gap-2 text-sm text-text-muted">
               <ShieldCheck className="h-4 w-4 text-accent" />
@@ -273,7 +273,7 @@ export default function SpanishLandingPage() {
             Salidas diarias desde Berlín. Grupos pequeños. Historiadores expertos. €29 por persona.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button href="/book" size="lg">Reservar Tour</Button>
+            <Button href="/book#booking" size="lg">Reservar Tour</Button>
             <Button href={whatsappHref} variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
               <MessageCircle className="mr-2 h-5 w-5" />
               Preguntar por WhatsApp

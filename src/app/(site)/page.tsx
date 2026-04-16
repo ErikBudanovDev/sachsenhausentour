@@ -87,7 +87,7 @@ export default function HomePage() {
             {c.hero.subtitle}
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button href="/book" size="lg">Book Your Tour — €29</Button>
+            <Button href="/book#booking" size="lg">Book Your Tour — €29</Button>
             <Button href="#tour-details" variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
               See Tour Details
             </Button>
@@ -350,7 +350,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="mt-5 text-center">
-                <Button href="/book" size="lg">Book Now!</Button>
+                <Button href="/book#booking" size="lg">Book Now!</Button>
               </div>
             </div>
 
@@ -416,7 +416,7 @@ export default function HomePage() {
                 Daily departures from Berlin. Expert historians. €29 per person.
               </p>
               <div className="mt-5">
-                <Button href="/book" size="lg">Book Your Tour Now</Button>
+                <Button href="/book#booking" size="lg">Book Your Tour Now</Button>
               </div>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-white/50">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -442,7 +442,7 @@ export default function HomePage() {
           </h2>
           <p className="mt-3 text-white/70">{c.finalCta.subheading}</p>
           <div className="mt-8">
-            <Button href="/book" size="lg">Book Your Tour Now</Button>
+            <Button href="/book#booking" size="lg">Book Your Tour Now</Button>
           </div>
           <p className="mt-4 text-sm text-white/50 italic">{c.finalCta.urgencyNote}</p>
         </div>

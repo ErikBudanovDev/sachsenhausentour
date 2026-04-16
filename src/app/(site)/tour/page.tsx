@@ -92,7 +92,7 @@ export default function TourPage() {
           <h2 className="font-heading text-3xl font-bold">Ready to Join?</h2>
           <p className="mt-2 text-text-muted">Reserve your spot for a meaningful journey through history.</p>
           <div className="mt-6">
-            <Button href="/book" size="lg">Book Your Tour</Button>
+            <Button href="/book#booking" size="lg">Book Your Tour</Button>
           </div>
         </div>
       </Section>

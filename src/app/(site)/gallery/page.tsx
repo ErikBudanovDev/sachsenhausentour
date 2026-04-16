@@ -64,7 +64,7 @@ export default function GalleryPage() {
             Join our guided tour and walk through these grounds with expert context.
           </p>
           <a
-            href="/book"
+            href="/book#booking"
             className="mt-6 inline-flex items-center justify-center rounded-sm bg-accent px-8 py-4 text-lg font-semibold text-primary transition-all hover:bg-accent-hover"
           >
             Book Your Tour

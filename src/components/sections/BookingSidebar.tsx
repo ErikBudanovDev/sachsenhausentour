@@ -112,7 +112,7 @@ export function BookingSidebar({ reviews }: BookingSidebarProps) {
         </div>
 
         <div className="mt-5">
-          <Button href="/book" size="lg" className="w-full">
+          <Button href="/book#booking" size="lg" className="w-full">
             Book Now!
           </Button>
         </div>

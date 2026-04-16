@@ -53,7 +53,7 @@ export function Nav() {
                 {item.label}
               </Link>
             ))}
-            <Button href="/book" size="sm">
+            <Button href="/book#booking" size="sm">
               Book Now
             </Button>
           </div>
@@ -89,7 +89,7 @@ export function Nav() {
               {item.label}
             </Link>
           ))}
-          <Button href="/book" size="lg" onClick={() => setMobileOpen(false)}>
+          <Button href="/book#booking" size="lg" onClick={() => setMobileOpen(false)}>
             Book Now
           </Button>
         </div>
