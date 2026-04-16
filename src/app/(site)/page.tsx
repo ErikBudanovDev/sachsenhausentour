@@ -15,6 +15,7 @@ import { homeContent } from '@/content/en/home'
 import { Section, Button, Card, Accordion } from '@/components/ui'
 import { BookingSidebar } from '@/components/sections/BookingSidebar'
 import { FAQSchema } from '@/components/seo/FAQSchema'
+import { MobileBookingBar } from '@/components/sections/MobileBookingBar'
 import type { Review } from '@/components/sections/ReviewSlider'
 import reviewsData from '@/content/reviews.json'
 
@@ -449,6 +450,9 @@ export default function HomePage() {
 
       {/* Structured Data */}
       <FAQSchema items={c.faq.items} />
+
+      {/* Sticky mobile booking bar */}
+      <MobileBookingBar />
     </>
   )
 }

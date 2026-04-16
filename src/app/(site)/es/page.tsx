@@ -15,6 +15,7 @@ import { ReviewSlider } from '@/components/sections/ReviewSlider'
 import type { Review } from '@/components/sections/ReviewSlider'
 import reviewsData from '@/content/reviews.json'
 import { FAQSchema } from '@/components/seo/FAQSchema'
+import { MobileBookingBar } from '@/components/sections/MobileBookingBar'
 import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
@@ -286,6 +287,9 @@ export default function SpanishLandingPage() {
 
       {/* Structured Data */}
       <FAQSchema items={faqs} />
+
+      {/* Sticky mobile booking bar */}
+      <MobileBookingBar />
     </>
   )
 }
