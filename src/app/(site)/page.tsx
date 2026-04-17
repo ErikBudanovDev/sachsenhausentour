@@ -16,6 +16,8 @@ import { Section, Button, Card, Accordion } from '@/components/ui'
 import { BookingSidebar } from '@/components/sections/BookingSidebar'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { MobileBookingBar } from '@/components/sections/MobileBookingBar'
+import { GallerySlider } from '@/components/sections/GallerySlider'
+import { VisitorInfo } from '@/components/sections/VisitorInfo'
 import type { Review } from '@/components/sections/ReviewSlider'
 import reviewsData from '@/content/reviews.json'
 
@@ -48,8 +50,12 @@ const galleryImages = [
   { src: '/images/gallery/DSCF5939-min-scaled.jpg', alt: 'Sachsenhausen concentration camp grounds' },
   { src: '/images/gallery/DSCF5947-min-1-scaled.jpg', alt: 'Tour group at Sachsenhausen memorial' },
   { src: '/images/gallery/DSCF5948-min-scaled.jpg', alt: 'Memorial structures at Sachsenhausen' },
+  { src: '/images/gallery/DSCF5956-min-scaled.jpg', alt: 'Historical exhibits inside the memorial' },
+  { src: '/images/gallery/DSCF5958-min-scaled.jpg', alt: 'Walking through the memorial grounds' },
   { src: '/images/gallery/DSCF5967-min-scaled.jpg', alt: 'Sachsenhausen camp grounds with visitors' },
+  { src: '/images/gallery/DSCF5969-min-scaled.jpg', alt: 'Guard tower and perimeter wall' },
   { src: '/images/gallery/DSCF5971-min-scaled.jpg', alt: 'Guide leading group at Sachsenhausen' },
+  { src: '/images/gallery/DSCF6098-scaled.jpg', alt: 'Tour group learning about the memorial history' },
 ]
 
 export default function HomePage() {
@@ -433,6 +439,16 @@ export default function HomePage() {
 
         </div>
       </div>
+
+      {/* ═══════════════ GALLERY SLIDER ═══════════════ */}
+      <GallerySlider
+        images={galleryImages}
+        heading="Tour Gallery"
+        subheading="A glimpse into the Sachsenhausen Memorial experience — through the lens of our guided tours."
+      />
+
+      {/* ═══════════════ VISITOR INFO ═══════════════ */}
+      <VisitorInfo />
 
       {/* ═══════════════ FINAL CTA ═══════════════ */}
       <section className="bg-navy py-20">
