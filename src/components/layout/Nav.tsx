@@ -25,16 +25,13 @@ export function Nav() {
           'fixed top-0 left-0 right-0 z-50 transition-all duration-[var(--transition-medium)]',
           scrolled
             ? 'bg-surface/95 backdrop-blur-sm shadow-sm border-b border-border'
-            : 'bg-transparent'
+            : 'bg-surface/90 backdrop-blur-sm'
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className={cn(
-              'font-heading text-xl font-bold tracking-wide transition-colors',
-              scrolled ? 'text-navy' : 'text-white'
-            )}
+            className="font-heading text-xl font-bold tracking-wide text-navy transition-colors"
           >
             {siteConfig.name.toUpperCase()}
           </Link>
@@ -45,10 +42,7 @@ export function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-accent',
-                  scrolled ? 'text-text-muted' : 'text-white/80 hover:text-white'
-                )}
+                className="text-sm font-medium text-text-muted transition-colors hover:text-accent"
               >
                 {item.label}
               </Link>
@@ -60,7 +54,7 @@ export function Nav() {
 
           {/* Mobile toggle */}
           <button
-            className={cn('md:hidden transition-colors', scrolled ? 'text-navy' : 'text-white')}
+            className="md:hidden text-navy transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
