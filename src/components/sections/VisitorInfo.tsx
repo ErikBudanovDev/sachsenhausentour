@@ -11,7 +11,7 @@ import {
 
 export function VisitorInfo() {
   return (
-    <section className="bg-primary py-16 md:py-24" id="visitor-info">
+    <section className="bg-primary py-14 md:py-20" id="visitor-info">
       <div className="mx-auto max-w-6xl px-4">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center mb-12">

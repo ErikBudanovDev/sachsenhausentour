@@ -296,7 +296,7 @@ export default function HomePage() {
       </Section>
 
       {/* ═══════════════ PHOTO BREAK ═══════════════ */}
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="overflow-hidden rounded-xl">
             <Image
@@ -494,7 +494,7 @@ export default function HomePage() {
       </Section>
 
       {/* ═══════════════ 12. FINAL CTA ═══════════════ */}
-      <section className="bg-navy py-20">
+      <section className="bg-navy py-16">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
             {c.finalCta.heading}
