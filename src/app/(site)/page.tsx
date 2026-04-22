@@ -63,7 +63,7 @@ export default function HomePage() {
   return (
     <>
       {/* ═══════════════ 1. HERO + BOOKING CARD ═══════════════ */}
-      <section className="relative overflow-hidden bg-navy">
+      <section aria-label="Sachsenhausen Tour from Berlin — book online" className="relative overflow-hidden bg-navy">
         {/* Background */}
         <Image
           src="/images/gallery/DSCF5931-min-scaled.jpg"
@@ -296,28 +296,28 @@ export default function HomePage() {
       </Section>
 
       {/* ═══════════════ PHOTO BREAK ═══════════════ */}
-      <div className="mx-auto max-w-6xl px-4 py-6">
+      <section aria-label="Memorial photos" className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="overflow-hidden rounded-xl">
+          <figure className="overflow-hidden rounded-xl">
             <Image
               src="/images/gallery/DSCF5936-min-scaled.jpg"
-              alt="Sachsenhausen concentration camp barracks"
+              alt="Preserved barracks at the Sachsenhausen concentration camp memorial site"
               width={600}
               height={400}
               className="h-64 w-full object-cover"
             />
-          </div>
-          <div className="overflow-hidden rounded-xl">
+          </figure>
+          <figure className="overflow-hidden rounded-xl">
             <Image
               src="/images/gallery/DSCF5969-min-scaled.jpg"
-              alt="Memorial site at Sachsenhausen"
+              alt="Memorial monument at Sachsenhausen honoring the victims"
               width={600}
               height={400}
               className="h-64 w-full object-cover"
             />
-          </div>
+          </figure>
         </div>
-      </div>
+      </section>
 
       {/* ═══════════════ 6. WHY VISIT SACHSENHAUSEN ═══════════════ */}
       <Section spacing="lg">
@@ -333,17 +333,28 @@ export default function HomePage() {
 
       {/* ═══════════════ 7. WHY CHOOSE OUR TOUR ═══════════════ */}
       <Section background="secondary" spacing="lg">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-5xl">
           <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl mb-8">{c.whyBook.heading}</h2>
-          <div className="space-y-4">
-            {c.whyBook.differentiators.map((d, i) => (
-              <div key={i} className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/15">
-                  <Check className="h-3.5 w-3.5 text-accent" />
+          <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-center">
+            <div className="space-y-4">
+              {c.whyBook.differentiators.map((d, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm">
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/15">
+                    <Check className="h-3.5 w-3.5 text-accent" />
+                  </div>
+                  <p className="text-text leading-relaxed">{d.text}</p>
                 </div>
-                <p className="text-text leading-relaxed">{d.text}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+            <figure className="overflow-hidden rounded-xl shadow-lg">
+              <Image
+                src="/images/gallery/DSCF6098-scaled.jpg"
+                alt="Tour guide explaining the history of Sachsenhausen to a group of visitors at the memorial"
+                width={760}
+                height={507}
+                className="h-full w-full object-cover"
+              />
+            </figure>
           </div>
         </div>
       </Section>
@@ -389,12 +400,12 @@ export default function HomePage() {
           <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
-                <p className="flex items-center gap-2 text-sm font-bold text-green-700 mb-3">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-green-700 mb-3">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100">
                     <Check className="h-3 w-3" />
                   </span>
                   Included
-                </p>
+                </h3>
                 <div className="space-y-2">
                   {c.whatsIncluded.items.filter((i) => i.included).map((item) => (
                     <div key={item.text} className="flex items-start gap-2">
@@ -405,12 +416,12 @@ export default function HomePage() {
                 </div>
               </div>
               <div>
-                <p className="flex items-center gap-2 text-sm font-bold text-red-700 mb-3">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-red-700 mb-3">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-100">
                     <X className="h-3 w-3" />
                   </span>
                   Not Included
-                </p>
+                </h3>
                 <div className="space-y-2">
                   {c.whatsIncluded.items.filter((i) => !i.included).map((item) => (
                     <div key={item.text} className="flex items-start gap-2">
@@ -451,7 +462,7 @@ export default function HomePage() {
           <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl mb-8">Things to Know Before You Go</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl bg-amber-50 border border-amber-100 p-5">
-              <p className="text-sm font-bold text-text mb-3">What to bring</p>
+              <h3 className="text-sm font-bold text-text mb-3">What to bring</h3>
               <ul className="space-y-2 text-sm text-text-muted">
                 <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Comfortable walking shoes</li>
                 <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Weather-appropriate clothing</li>
@@ -460,7 +471,7 @@ export default function HomePage() {
               </ul>
             </div>
             <div className="rounded-xl bg-blue-50 border border-blue-100 p-5">
-              <p className="text-sm font-bold text-text mb-3">Know before you go</p>
+              <h3 className="text-sm font-bold text-text mb-3">Know before you go</h3>
               <ul className="space-y-2 text-sm text-text-muted">
                 <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />A €3 memorial donation is collected on-site</li>
                 <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />Most of the tour is outdoors</li>
@@ -494,7 +505,7 @@ export default function HomePage() {
       </Section>
 
       {/* ═══════════════ 12. FINAL CTA ═══════════════ */}
-      <section className="bg-navy py-16">
+      <section aria-label="Book your Sachsenhausen tour" className="bg-navy py-16">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
             {c.finalCta.heading}
@@ -509,6 +520,57 @@ export default function HomePage() {
 
       {/* Structured Data */}
       <FAQSchema items={c.faq.items} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'TouristTrip',
+            name: 'Sachsenhausen Concentration Camp Memorial Tour from Berlin',
+            description:
+              'Historian-led 6-hour guided tour from Berlin to Sachsenhausen Memorial. Small groups, expert context, free cancellation.',
+            url: 'https://sachsenhausentour.de',
+            touristType: 'History & Memorial',
+            itinerary: {
+              '@type': 'ItemList',
+              itemListElement: c.timeline.stops.map((stop, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                name: stop.title,
+                description: stop.description,
+              })),
+            },
+            offers: {
+              '@type': 'Offer',
+              price: '29',
+              priceCurrency: 'EUR',
+              availability: 'https://schema.org/InStock',
+              url: 'https://sachsenhausentour.de/book',
+              validFrom: '2024-01-01',
+            },
+            provider: {
+              '@type': 'TourOperator',
+              name: 'Be Original Tours',
+              url: 'https://sachsenhausentour.de',
+              telephone: siteConfig.whatsapp,
+              email: siteConfig.email,
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: 'Otto-Braun-Straße 65',
+                addressLocality: 'Berlin',
+                postalCode: '10178',
+                addressCountry: 'DE',
+              },
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.8',
+              reviewCount: '320',
+              bestRating: '5',
+            },
+          }),
+        }}
+      />
 
       {/* Sticky mobile booking bar */}
       <MobileBookingBar />
