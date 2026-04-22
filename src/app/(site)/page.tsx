@@ -63,9 +63,8 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ═══════════════ HERO ═══════════════ */}
+      {/* ═══════════════ 1. HERO ═══════════════ */}
       <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
-        {/* Fallback image for SEO + no-JS */}
         <Image
           src="/images/gallery/DSCF5931-min-scaled.jpg"
           alt="Sachsenhausen Memorial — guided tour from Berlin"
@@ -73,7 +72,6 @@ export default function HomePage() {
           className="object-cover"
           priority
         />
-        {/* Background video overlay */}
         <video
           autoPlay
           muted
@@ -132,13 +130,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ═══════════════ TWO-COLUMN LAYOUT ═══════════════ */}
+      {/* ═══════════════ 2. OVERVIEW / HIGHLIGHTS (two-column) ═══════════════ */}
       <div id="tour-details" className="mx-auto max-w-7xl px-4 py-12 lg:py-16">
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
-
-          {/* ─── LEFT: Tour Content ─── */}
-          <div className="space-y-12">
-
+          <div className="space-y-10">
             {/* Tour Title & Intro */}
             <div>
               <h2 className="font-heading text-3xl font-bold sm:text-4xl">
@@ -171,7 +166,7 @@ export default function HomePage() {
                 </div>
               </Card>
               <Card padding="lg" className="border-accent/30 bg-accent/5">
-                <h3 className="font-heading text-xl font-bold mb-5">Quick Highlights</h3>
+                <h3 className="font-heading text-xl font-bold mb-5">Tour Highlights</h3>
                 <div className="space-y-3">
                   {quickHighlights.map((item) => (
                     <div key={item} className="flex items-start gap-2.5">
@@ -182,68 +177,33 @@ export default function HomePage() {
                 </div>
               </Card>
             </div>
+          </div>
 
-            {/* Photo Gallery */}
+          {/* Sidebar (desktop) */}
+          <aside className="hidden lg:block">
+            <BookingSidebar reviews={reviewsData as Review[]} />
+          </aside>
+        </div>
+      </div>
+
+      {/* ═══════════════ 3. IMAGE GALLERY (full-width) ═══════════════ */}
+      <GallerySlider
+        images={galleryImages}
+        heading="Tour Gallery"
+        subheading="A glimpse into the Sachsenhausen Memorial experience — through the lens of our guided tours."
+      />
+
+      {/* ═══════════════ 4. OPENING HOURS, ADMISSION & DIRECTIONS (full-width) ═══════════════ */}
+      <VisitorInfo />
+
+      {/* ═══════════════ 5–11. TOUR CONTENT (two-column resumes) ═══════════════ */}
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:py-16">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
+          <div className="space-y-12">
+
+            {/* 5. Itinerary */}
             <div>
-              <div className="overflow-hidden rounded-md">
-                <Image
-                  src="/images/gallery/DSCF6098-scaled.jpg"
-                  alt="Tour guide leading a group at Sachsenhausen Memorial"
-                  width={800}
-                  height={500}
-                  className="w-full object-cover"
-                />
-              </div>
-              <div className="mt-3 grid grid-cols-4 gap-2">
-                {galleryImages.slice(0, 4).map((img) => (
-                  <div key={img.src} className="overflow-hidden rounded">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      width={200}
-                      height={140}
-                      className="h-24 w-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Why Visit */}
-            <div>
-              <h2 className="font-heading text-2xl font-bold">{c.whyVisit.heading}</h2>
-              <div className="mt-4 space-y-4 text-text-muted leading-relaxed">
-                {c.whyVisit.paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-            </div>
-
-            {/* Photo break */}
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="overflow-hidden rounded-md">
-                <Image
-                  src="/images/gallery/DSCF5936-min-scaled.jpg"
-                  alt="Sachsenhausen concentration camp barracks"
-                  width={400}
-                  height={280}
-                  className="h-56 w-full object-cover"
-                />
-              </div>
-              <div className="overflow-hidden rounded-md">
-                <Image
-                  src="/images/gallery/DSCF5969-min-scaled.jpg"
-                  alt="Memorial site at Sachsenhausen"
-                  width={400}
-                  height={280}
-                  className="h-56 w-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Tour Itinerary */}
-            <div>
-              <h2 className="font-heading text-2xl font-bold">{c.timeline.heading}</h2>
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.timeline.heading}</h2>
               <div className="mt-6">
                 {c.timeline.stops.map((stop, i) => (
                   <div key={i} className="relative flex gap-4 pb-8 last:pb-0">
@@ -263,19 +223,40 @@ export default function HomePage() {
             </div>
 
             {/* Photo break */}
-            <div className="overflow-hidden rounded-md">
-              <Image
-                src="/images/gallery/DSCF5956-min-scaled.jpg"
-                alt="Visitors at Sachsenhausen memorial grounds"
-                width={800}
-                height={400}
-                className="w-full object-cover"
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="overflow-hidden rounded-lg">
+                <Image
+                  src="/images/gallery/DSCF5936-min-scaled.jpg"
+                  alt="Sachsenhausen concentration camp barracks"
+                  width={400}
+                  height={280}
+                  className="h-56 w-full object-cover"
+                />
+              </div>
+              <div className="overflow-hidden rounded-lg">
+                <Image
+                  src="/images/gallery/DSCF5969-min-scaled.jpg"
+                  alt="Memorial site at Sachsenhausen"
+                  width={400}
+                  height={280}
+                  className="h-56 w-full object-cover"
+                />
+              </div>
             </div>
 
-            {/* Why Choose Our Tour */}
+            {/* 6. Why Visit Sachsenhausen */}
             <div>
-              <h2 className="font-heading text-2xl font-bold">{c.whyBook.heading}</h2>
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.whyVisit.heading}</h2>
+              <div className="mt-4 space-y-4 text-text-muted leading-relaxed">
+                {c.whyVisit.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            </div>
+
+            {/* 7. Why Choose Our Tour */}
+            <div>
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.whyBook.heading}</h2>
               <div className="mt-5 space-y-4">
                 {c.whyBook.differentiators.map((d, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -288,11 +269,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Meet Your Guide */}
-            <div className="rounded-lg border border-border bg-surface p-6">
-              <h2 className="font-heading text-2xl font-bold">{c.meetGuide.heading}</h2>
+            {/* 8. Meet Your Guide */}
+            <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.meetGuide.heading}</h2>
               <div className="mt-5 flex flex-col gap-5 sm:flex-row">
-                <div className="relative h-48 w-48 shrink-0 overflow-hidden rounded-md sm:h-56 sm:w-44">
+                <div className="relative h-48 w-48 shrink-0 overflow-hidden rounded-lg sm:h-56 sm:w-44">
                   <Image
                     src={c.meetGuide.image!}
                     alt={c.meetGuide.name}
@@ -318,8 +299,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* What's Included / Not Included */}
-            <div className="rounded-lg border border-border bg-white p-6">
+            {/* 9. What's Included / Not Included */}
+            <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
               <h2 className="font-heading text-2xl font-bold mb-5">{c.whatsIncluded.heading}</h2>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
@@ -355,13 +336,10 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-5 text-center">
-                <Button href="/book#booking" size="lg">Book Now!</Button>
-              </div>
             </div>
 
             {/* Meeting Point */}
-            <div className="rounded-lg border-2 border-accent/20 bg-accent/5 p-6">
+            <div className="rounded-xl border-2 border-accent/20 bg-accent/5 p-6">
               <h2 className="font-heading text-xl font-bold">Meeting Point</h2>
               <div className="mt-3 flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
@@ -374,40 +352,40 @@ export default function HomePage() {
                 href="https://maps.google.com/?q=Generator+Berlin+Alexanderplatz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-md border border-border bg-white py-2.5 text-sm font-medium text-accent hover:bg-secondary transition-colors"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-border bg-white py-2.5 text-sm font-medium text-accent hover:bg-secondary transition-colors"
               >
                 View on Google Maps
               </a>
             </div>
 
-            {/* Things to Know */}
+            {/* 10. Things to Know Before You Go */}
             <div>
-              <h2 className="font-heading text-2xl font-bold">Things to Know Before You Go</h2>
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl">Things to Know Before You Go</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-md bg-amber-50 p-4">
-                  <p className="text-sm font-bold text-text mb-2">What to bring</p>
-                  <ul className="space-y-1 text-sm text-text-muted">
-                    <li>Comfortable walking shoes</li>
-                    <li>Weather-appropriate clothing</li>
-                    <li>Water and a snack</li>
-                    <li>Valid ABC zone transit ticket</li>
+                <div className="rounded-lg bg-amber-50 border border-amber-100 p-5">
+                  <p className="text-sm font-bold text-text mb-3">What to bring</p>
+                  <ul className="space-y-2 text-sm text-text-muted">
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Comfortable walking shoes</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Weather-appropriate clothing</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Water and a snack</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />Valid ABC zone transit ticket</li>
                   </ul>
                 </div>
-                <div className="rounded-md bg-amber-50 p-4">
-                  <p className="text-sm font-bold text-text mb-2">Know before you go</p>
-                  <ul className="space-y-1 text-sm text-text-muted">
-                    <li>A €3 memorial donation is collected on-site</li>
-                    <li>Most of the tour is outdoors</li>
-                    <li>Recommended for ages 14+</li>
-                    <li>Tour runs rain or shine</li>
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-5">
+                  <p className="text-sm font-bold text-text mb-3">Know before you go</p>
+                  <ul className="space-y-2 text-sm text-text-muted">
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />A €3 memorial donation is collected on-site</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />Most of the tour is outdoors</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />Recommended for ages 14+</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />Tour runs rain or shine</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* FAQs */}
+            {/* 11. FAQs */}
             <div>
-              <h2 className="font-heading text-2xl font-bold mb-6">{c.faq.heading}</h2>
+              <h2 className="font-heading text-2xl font-bold sm:text-3xl mb-6">{c.faq.heading}</h2>
               {c.faq.items.map((faq) => (
                 <Accordion key={faq.question} title={faq.question}>
                   {faq.answer}
@@ -416,7 +394,7 @@ export default function HomePage() {
             </div>
 
             {/* Mobile-only CTA (sidebar not visible) */}
-            <div className="lg:hidden rounded-lg bg-navy p-8 text-center">
+            <div className="lg:hidden rounded-xl bg-navy p-8 text-center">
               <h2 className="font-heading text-2xl font-bold text-white">Ready to Book?</h2>
               <p className="mt-2 text-white/70 text-sm">
                 Daily departures from Berlin. Expert historians. €29 per person.
@@ -432,25 +410,14 @@ export default function HomePage() {
 
           </div>
 
-          {/* ─── RIGHT: Sticky Sidebar (desktop) ─── */}
+          {/* Sidebar (desktop) — re-appears and sticks for the rest of the page */}
           <aside className="hidden lg:block">
             <BookingSidebar reviews={reviewsData as Review[]} />
           </aside>
-
         </div>
       </div>
 
-      {/* ═══════════════ GALLERY SLIDER ═══════════════ */}
-      <GallerySlider
-        images={galleryImages}
-        heading="Tour Gallery"
-        subheading="A glimpse into the Sachsenhausen Memorial experience — through the lens of our guided tours."
-      />
-
-      {/* ═══════════════ VISITOR INFO ═══════════════ */}
-      <VisitorInfo />
-
-      {/* ═══════════════ FINAL CTA ═══════════════ */}
+      {/* ═══════════════ 12. FINAL CTA ═══════════════ */}
       <section className="bg-navy py-20">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
