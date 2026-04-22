@@ -124,17 +124,17 @@ export default function HomePage() {
             <div className="hidden lg:block">
               <div className="overflow-hidden rounded-xl bg-white shadow-2xl">
                 {/* Price header */}
-                <div className="bg-navy px-6 py-4">
+                <div className="bg-accent px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm text-white/50 line-through">€49</span>
+                        <span className="text-sm text-white/60 line-through">€49</span>
                         <span className="font-heading text-3xl font-bold text-white">€29</span>
                       </div>
-                      <p className="text-xs text-white/60">per person</p>
+                      <p className="text-xs text-white/70">per person</p>
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                    <div className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1">
+                      <Sparkles className="h-3.5 w-3.5 text-white" />
                       <span className="text-xs font-semibold text-white">40% OFF</span>
                     </div>
                   </div>
@@ -505,16 +505,16 @@ export default function HomePage() {
       </Section>
 
       {/* ═══════════════ 12. FINAL CTA ═══════════════ */}
-      <section aria-label="Book your Sachsenhausen tour" className="bg-navy py-16">
+      <section aria-label="Book your Sachsenhausen tour" className="border-t border-border bg-secondary py-16">
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="font-heading text-3xl font-bold text-text sm:text-4xl">
             {c.finalCta.heading}
           </h2>
-          <p className="mt-3 text-white/70">{c.finalCta.subheading}</p>
+          <p className="mt-3 text-text-muted">{c.finalCta.subheading}</p>
           <div className="mt-8">
             <Button href="/book#booking" size="lg">Book Your Tour Now</Button>
           </div>
-          <p className="mt-4 text-sm text-white/50 italic">{c.finalCta.urgencyNote}</p>
+          <p className="mt-4 text-sm text-text-muted italic">{c.finalCta.urgencyNote}</p>
         </div>
       </section>
 

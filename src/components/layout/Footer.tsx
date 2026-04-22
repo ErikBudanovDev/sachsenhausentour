@@ -5,22 +5,22 @@ import { Container } from '@/components/ui'
 
 export function Footer() {
   return (
-    <footer className="bg-navy text-white/80">
+    <footer className="border-t border-border bg-white">
       <Container className="py-12 md:py-16">
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-1">
-            <p className="font-heading text-lg font-bold tracking-wide text-white">
+            <p className="font-heading text-lg font-bold tracking-wide text-text">
               {siteConfig.name.toUpperCase()}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-white/60">
+            <p className="mt-2 text-sm leading-relaxed text-text-muted">
               A respectful, educational journey through one of history&apos;s most significant memorial sites.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text">
               Explore
             </h3>
             <ul className="space-y-2">
@@ -28,7 +28,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/60 transition-colors hover:text-accent"
+                    className="text-sm text-text-muted transition-colors hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -39,10 +39,10 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text">
               Contact
             </h3>
-            <ul className="space-y-2 text-sm text-white/60">
+            <ul className="space-y-2 text-sm text-text-muted">
               <li>
                 <a
                   href={`mailto:${siteConfig.email}`}
@@ -66,7 +66,7 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-accent">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text">
               Legal
             </h3>
             <ul className="space-y-2">
@@ -74,7 +74,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/60 transition-colors hover:text-accent"
+                    className="text-sm text-text-muted transition-colors hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -84,7 +84,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs text-white/40">
+        <div className="mt-12 border-t border-border pt-8 text-center text-xs text-text-muted">
           &copy; {new Date().getFullYear()} {siteConfig.name} &mdash; A Be Original Tours Experience
         </div>
       </Container>

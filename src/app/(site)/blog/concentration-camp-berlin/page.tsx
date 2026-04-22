@@ -162,11 +162,11 @@ export default function ConcentrationCampBerlinPost() {
           </p>
 
           {/* CTA */}
-          <div className="mt-12 rounded-md bg-navy p-8 text-center">
-            <h2 className="font-heading text-2xl font-bold text-white">
+          <div className="mt-12 rounded-md border border-border bg-secondary p-8 text-center">
+            <h2 className="font-heading text-2xl font-bold text-text">
               Visit Sachsenhausen with an Expert Guide
             </h2>
-            <p className="mt-3 text-white/80">
+            <p className="mt-3 text-text-muted">
               Daily departures from Berlin. 6-hour guided experience. &euro;29 per person.
             </p>
             <div className="mt-6">

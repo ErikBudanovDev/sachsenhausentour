@@ -22,7 +22,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   ghost:
     'text-accent hover:text-accent-hover hover:underline underline-offset-4',
   navy:
-    'bg-navy text-white font-semibold hover:bg-navy-light shadow-md',
+    'bg-accent text-white font-semibold hover:bg-accent-hover shadow-md',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
