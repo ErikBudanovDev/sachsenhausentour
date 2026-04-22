@@ -131,7 +131,7 @@ export default function HomePage() {
       </div>
 
       {/* ═══════════════ 2. OVERVIEW / HIGHLIGHTS (two-column) ═══════════════ */}
-      <div id="tour-details" className="mx-auto max-w-7xl px-4 py-12 lg:py-16">
+      <div id="tour-details" className="mx-auto max-w-7xl px-4 pt-16 pb-12 lg:pt-20 lg:pb-16">
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
           <div className="space-y-10">
             {/* Tour Title & Intro */}
