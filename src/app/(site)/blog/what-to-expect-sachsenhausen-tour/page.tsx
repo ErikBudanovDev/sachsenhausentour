@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Section, Button } from '@/components/ui'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { AuthorCard, AuthorSchema } from '@/components/seo/AuthorCard'
 import { teamMembers } from '@/content/en/team'
+
+const DRAFT = true
 
 export const metadata: Metadata = {
   title: 'What to Expect from a Sachsenhausen Tour Berlin — History, Routes & Insights',
@@ -44,6 +47,8 @@ const articleFAQs = [
 const author = teamMembers.find((m) => m.slug === 'georgia-hartmann')!
 
 export default function WhatToExpectSachsenhausenTourPost() {
+  if (DRAFT) notFound()
+
   return (
     <>
       {/* Hero */}

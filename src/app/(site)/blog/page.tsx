@@ -16,6 +16,7 @@ const blogPosts = [
     image: '/images/gallery/DSCF5939-min-scaled.jpg',
     date: '2025-03-15',
     category: 'Memorial Guide',
+    draft: false,
   },
   {
     slug: 'sachsenhausen-tour-berlin-journey',
@@ -24,6 +25,7 @@ const blogPosts = [
     image: '/images/gallery/DSCF5947-min-1-scaled.jpg',
     date: '2025-04-21',
     category: 'Tour Guide',
+    draft: true,
   },
   {
     slug: 'what-to-expect-sachsenhausen-tour',
@@ -32,6 +34,7 @@ const blogPosts = [
     image: '/images/gallery/DSCF5931-min-scaled.jpg',
     date: '2025-04-21',
     category: 'Tour Guide',
+    draft: true,
   },
 ]
 
@@ -49,7 +52,7 @@ export default function BlogPage() {
 
       <Section spacing="lg">
         <div className="mx-auto max-w-4xl space-y-8">
-          {blogPosts.map((post) => (
+          {blogPosts.filter((post) => !post.draft).map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}

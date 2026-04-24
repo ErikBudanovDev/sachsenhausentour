@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Section, Button } from '@/components/ui'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { AuthorCard, AuthorSchema } from '@/components/seo/AuthorCard'
 import { teamMembers } from '@/content/en/team'
+
+const DRAFT = true
 
 export const metadata: Metadata = {
   title: 'Sachsenhausen Tour Berlin — A Journey Through History and Memory',
@@ -44,6 +47,8 @@ const articleFAQs = [
 const author = teamMembers.find((m) => m.slug === 'miguel-ribeiro')!
 
 export default function SachsenhausenTourBerlinJourneyPost() {
+  if (DRAFT) notFound()
+
   return (
     <>
       {/* Hero */}
