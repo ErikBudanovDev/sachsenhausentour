@@ -6,18 +6,26 @@ import { AuthorCard, AuthorSchema } from '@/components/seo/AuthorCard'
 import { teamMembers } from '@/content/en/team'
 
 export const metadata: Metadata = {
-  title: 'Concentration Camp Near Berlin – Sachsenhausen Memorial Guide',
+  title: 'Concentration Camp Near Berlin Germany — Sachsenhausen Memorial Guide & Tour',
   description:
-    'Sachsenhausen is the most significant concentration camp near Berlin, just 35 km north. Learn about its history, how to visit, and why a guided tour makes the difference.',
+    'Sachsenhausen is the most significant concentration camp near Berlin Germany, just 35 km north. Plan your Berlin concentration camp tour, learn the history, and discover why this is one of the top historical places to visit in Berlin.',
   alternates: {
     canonical: '/blog/concentration-camp-berlin',
   },
+  keywords: [
+    'concentration camp near berlin germany',
+    'concentration camp berlin tour',
+    'concentration camp berlin germany',
+    'world war two museum berlin',
+    'historical places to visit in berlin',
+    'visit sachsenhausen concentration camp',
+  ],
 }
 
 const articleFAQs = [
   {
-    question: 'Which concentration camp is closest to Berlin?',
-    answer: 'Sachsenhausen concentration camp is the closest major memorial to Berlin, located just 35 km north in Oranienburg. It is reachable by S-Bahn in about 50 minutes from central Berlin.',
+    question: 'Which concentration camp near Berlin Germany is closest?',
+    answer: 'Sachsenhausen is the closest concentration camp near Berlin Germany, located just 35 km north in Oranienburg. It is reachable by S-Bahn in about 50 minutes from central Berlin and is one of the most important historical places to visit in Berlin.',
   },
   {
     question: 'Can you visit a concentration camp from Berlin as a day trip?',
@@ -51,10 +59,10 @@ export default function ConcentrationCampBerlinPost() {
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
           <p className="text-sm font-medium uppercase tracking-widest text-accent">Memorial Guide</p>
           <h1 className="mt-3 font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            Concentration Camp Near Berlin: Visiting Sachsenhausen Memorial
+            Concentration Camp Near Berlin Germany: Visiting Sachsenhausen Memorial
           </h1>
           <p className="mt-4 text-white/80">
-            The most important Holocaust memorial site accessible as a day trip from the German capital.
+            The most important World War Two memorial site and historical place to visit in Berlin — accessible as a day trip from the German capital.
           </p>
         </div>
       </section>
@@ -76,7 +84,7 @@ export default function ConcentrationCampBerlinPost() {
             in the town of Oranienburg.
           </p>
 
-          <h2 className="mt-12 font-heading text-2xl font-bold">Sachsenhausen: The Concentration Camp Near Berlin</h2>
+          <h2 className="mt-12 font-heading text-2xl font-bold">Sachsenhausen: The Concentration Camp Near Berlin Germany</h2>
           <p className="mt-4 text-text-muted leading-relaxed">
             Sachsenhausen was established in 1936 as one of the first major concentration camps built by the Nazi
             regime. Unlike many camps, it was designed to serve as a <strong>model camp</strong> — a template for
@@ -135,17 +143,16 @@ export default function ConcentrationCampBerlinPost() {
             </li>
           </ul>
 
-          <h2 className="mt-12 font-heading text-2xl font-bold">Why a Guided Tour Makes the Difference</h2>
+          <h2 className="mt-12 font-heading text-2xl font-bold">Why a Berlin Concentration Camp Tour Makes the Difference</h2>
           <p className="mt-4 text-text-muted leading-relaxed">
             Sachsenhausen Memorial can be visited independently, but the experience is fundamentally different
             with a trained historian as your guide. The physical remains of the camp — the gate, the roll call
-            area, the barracks foundations — reveal their full significance only with expert context.
+            area, the barracks foundations — reveal their full significance only with expert context on a proper concentration camp Berlin tour.
           </p>
           <p className="mt-4 text-text-muted leading-relaxed">
-            A guided tour provides the individual stories of prisoners and survivors, explains the political
+            A guided Sachsenhausen concentration camp tour from Berlin provides the individual stories of prisoners and survivors, explains the political
             context of 1930s Germany, and helps visitors understand not just what happened at Sachsenhausen,
-            but <em>why</em> it matters today. This is especially important for first-time visitors to a
-            Holocaust memorial site.
+            but <em>why</em> it matters today. Alongside the many World War Two museums in Berlin, this is one of the most important historical places to visit in Berlin for anyone seeking to understand the Holocaust.
           </p>
 
           <h2 className="mt-12 font-heading text-2xl font-bold">Berlin to Auschwitz: Is It Worth the Trip?</h2>

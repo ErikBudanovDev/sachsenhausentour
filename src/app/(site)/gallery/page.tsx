@@ -3,9 +3,9 @@ import Image from 'next/image'
 import { Section } from '@/components/ui'
 
 export const metadata: Metadata = {
-  title: 'Gallery',
+  title: 'Sachsenhausen Camp Berlin — Tour Photos & Memorial Gallery',
   description:
-    'Photos from the Sachsenhausen Memorial and our guided tours from Berlin.',
+    'Photos from our Sachsenhausen tour Berlin. See images of the Sachsenhausen concentration camp memorial, guided tour groups, and the historical site near Berlin Germany.',
 }
 
 const galleryImages = [

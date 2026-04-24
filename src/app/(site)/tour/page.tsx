@@ -3,9 +3,9 @@ import Image from 'next/image'
 import { Section, Accordion, Button } from '@/components/ui'
 
 export const metadata: Metadata = {
-  title: 'Tour Details',
+  title: 'Sachsenhausen Concentration Camp Memorial Tour — Tour Details & Itinerary',
   description:
-    'Everything you need to know about our guided Sachsenhausen Memorial tour from Berlin.',
+    'Full details of our Sachsenhausen concentration camp memorial tour from Berlin. See the itinerary, what to expect on this guided tour of the Sachsenhausen concentration camp, tickets info, and meeting point.',
 }
 
 export default function TourPage() {
@@ -15,16 +15,16 @@ export default function TourPage() {
       <section className="relative flex min-h-[60vh] items-center justify-center overflow-hidden">
         <Image
           src="/images/gallery/DSCF5939-min-scaled.jpg"
-          alt="Sachsenhausen Memorial pathway"
+          alt="Sachsenhausen concentration camp memorial tour — pathway through the memorial grounds"
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-navy/65" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">Tour Details</h1>
+          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">Sachsenhausen Concentration Camp Memorial Tour</h1>
           <p className="mt-4 text-lg text-white/70">
-            A full-day guided memorial experience from Berlin
+            A full-day guided tour of the Sachsenhausen concentration camp from Berlin
           </p>
         </div>
       </section>

@@ -3,9 +3,9 @@ import type { HomeContent } from '../types'
 export const homeContent: HomeContent = {
   /* ─── 1. Hero Section (Above Fold) ─── */
   hero: {
-    title: 'Sachsenhausen Tour from Berlin – Expert Guided Memorial Visit',
+    title: 'Sachsenhausen Tour Berlin — Guided Concentration Camp Memorial Visit',
     subtitle:
-      'Join a historian-led 6-hour journey from Berlin to Sachsenhausen Memorial. Small groups, deep context, and a respectful approach to one of history\u2019s most important sites.',
+      'Join our Sachsenhausen tour from Berlin — a historian-led 6-hour concentration camp memorial tour. Small groups, deep context, and a respectful approach to one of history\u2019s most important sites.',
     cta: 'Book Your Tour — \u20AC29',
     ctaHref: '/book',
     ctaSecondary: 'See Tour Details',
@@ -63,11 +63,11 @@ export const homeContent: HomeContent = {
 
   /* ─── 5. Why Visit Sachsenhausen from Berlin? ─── */
   whyVisit: {
-    heading: 'Why Visit Sachsenhausen from Berlin?',
+    heading: 'Why Visit the Sachsenhausen Concentration Camp from Berlin?',
     paragraphs: [
-      'Sachsenhausen concentration camp, located just 35 kilometres north of Berlin in Oranienburg, was one of the first major camps established by the Nazi regime in 1936. It served as a model for the entire concentration camp system and as a training ground for SS officers who went on to run camps across Europe.',
-      'Visiting Sachsenhausen is not just about seeing a historical site — it is about understanding the mechanisms of state-organised terror, the experiences of over 200,000 prisoners, and the lessons that remain vital for our world today.',
-      'As a day trip from Berlin, Sachsenhausen offers an accessible yet profoundly impactful experience. With expert guidance, visitors can grasp the full historical context that a self-guided visit simply cannot provide.',
+      'The Sachsenhausen concentration camp near Berlin Germany, located just 35 kilometres north in Oranienburg, was one of the first major camps established by the Nazi regime in 1936. It served as a model for the entire concentration camp system and as a training ground for SS officers who went on to run camps across Europe.',
+      'A Sachsenhausen tour from Berlin is not just about seeing a historical site — it is about understanding the mechanisms of state-organised terror, the experiences of over 200,000 prisoners, and the lessons that remain vital for our world today.',
+      'As one of the most important historical places to visit in Berlin, Sachsenhausen offers an accessible yet profoundly impactful experience. With expert guidance on a Berlin concentration camp tour, visitors can grasp the full historical context that a self-guided visit simply cannot provide.',
     ],
     highlights: [
       {
@@ -113,7 +113,7 @@ export const homeContent: HomeContent = {
 
   /* ─── 7. Why Choose Our Tour? ─── */
   whyBook: {
-    heading: 'Why Choose Our Sachsenhausen Tour?',
+    heading: 'Why Choose Our Sachsenhausen Tour Berlin?',
     differentiators: [
       {
         text: 'Led by historians trained specifically in Holocaust education — not general tour guides reading from a script.',
@@ -156,7 +156,7 @@ export const homeContent: HomeContent = {
 
   /* ─── 9. Sachsenhausen Tour Itinerary ─── */
   timeline: {
-    heading: 'Sachsenhausen Tour Itinerary',
+    heading: 'Sachsenhausen Concentration Camp Tour Itinerary',
     stops: [
       {
         title: 'Departure from Berlin',
@@ -270,7 +270,7 @@ export const homeContent: HomeContent = {
 
   /* ─── 13. Testimonials ─── */
   testimonials: {
-    heading: 'What Visitors Say About Our Sachsenhausen Tour',
+    heading: 'What Visitors Say About Our Sachsenhausen Tour Berlin',
     items: [
       {
         quote:
@@ -317,7 +317,7 @@ export const homeContent: HomeContent = {
     items: [
       {
         question: 'Do you need tickets for Sachsenhausen concentration camp?',
-        answer: 'Entry to the Sachsenhausen Memorial is free — no tickets are required. However, if you want a guided experience with expert historical commentary, you can book a guided tour from Berlin starting at \u20AC29 per person. Our tour includes a trained historian, small group size, and transport guidance from central Berlin.',
+        answer: 'Entry to the Sachsenhausen Memorial is free — no Sachsenhausen concentration camp tickets are required. However, if you want a guided experience with expert historical commentary, you can book a Sachsenhausen tour from Berlin starting at \u20AC29 per person. Our concentration camp memorial tour includes a trained historian, small group size, and transport guidance from central Berlin.',
       },
       {
         question: 'How long is the Sachsenhausen tour from Berlin?',
@@ -356,10 +356,10 @@ export const homeContent: HomeContent = {
 
   /* ─── 15. About the Company ─── */
   aboutCompany: {
-    heading: 'About Sachsenhausen Tour',
+    heading: 'About Sachsenhausen Tour Berlin',
     paragraphs: [
-      'Sachsenhausen Tour is operated by Be Original Tours, a Berlin-based tour company founded in 2015. We specialise in historically grounded, ethically led memorial experiences that prioritise education, respect, and understanding.',
-      'Over the past decade, we have guided more than 15,000 visitors through Sachsenhausen Memorial — from students and educators to families and solo travellers from around the world. Our team of trained historians brings academic rigour and genuine passion to every tour.',
+      'Sachsenhausen Tour Berlin is operated by Be Original Tours, a Berlin-based tour company founded in 2015. We specialise in historically grounded, ethically led concentration camp memorial tours that prioritise education, respect, and understanding.',
+      'Over the past decade, we have guided more than 15,000 visitors on our Sachsenhausen concentration camp tour from Berlin — from students and educators to families and solo travellers from around the world. Our team of trained historians brings academic rigour and genuine passion to every tour.',
     ],
     founded: '2015',
     mission: 'To preserve memory through education, helping visitors understand not just what happened at Sachsenhausen, but why it matters today.',

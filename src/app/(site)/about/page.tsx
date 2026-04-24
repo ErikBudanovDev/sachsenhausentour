@@ -6,9 +6,9 @@ import { teamMembers, companyHistory, achievements } from '@/content/en/team'
 import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
-  title: 'About Us — Meet the Historians Behind Sachsenhausen Tour',
+  title: 'About Us — The Historians Behind the Best Berlin Concentration Camp Tour',
   description:
-    'Sachsenhausen Tour is operated by Be Original Tours, a Berlin-based company founded in 2015. Meet our team of trained historians and Holocaust educators.',
+    'Meet the team behind the #1 rated Sachsenhausen tour Berlin. Our historians lead guided concentration camp tours from Berlin to one of the most important historical places to visit in Berlin.',
 }
 
 const values = [

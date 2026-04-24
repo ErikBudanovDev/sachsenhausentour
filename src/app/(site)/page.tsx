@@ -26,9 +26,17 @@ import reviewsData from '@/content/reviews.json'
 import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
-  title: 'Sachsenhausen Tour from Berlin – Expert Guided Memorial Visit | €29',
+  title: 'Sachsenhausen Tour Berlin — Concentration Camp Memorial Tour from Berlin | €29',
   description:
-    'Join a historian-led 6-hour guided tour from Berlin to Sachsenhausen Memorial. Small groups, expert context, free cancellation. Book online for €29.',
+    'Book the #1 rated Sachsenhausen tour from Berlin. 6-hour guided concentration camp memorial tour led by expert historians. Small groups, free cancellation. €29 per person.',
+  keywords: [
+    'sachsenhausen tour berlin',
+    'sachsenhausen tour from berlin',
+    'sachsenhausen concentration camp tour from berlin',
+    'sachsenhausen concentration camp memorial tour',
+    'berlin concentration camp tour',
+    'concentration camp near berlin germany',
+  ],
 }
 
 const quickHighlights = [
@@ -43,16 +51,16 @@ const quickHighlights = [
 ]
 
 const galleryImages = [
-  { src: '/images/gallery/DSCF5931-min-scaled.jpg', alt: 'Sachsenhausen memorial entrance gate' },
-  { src: '/images/gallery/DSCF5939-min-scaled.jpg', alt: 'Sachsenhausen concentration camp grounds' },
-  { src: '/images/gallery/DSCF5947-min-1-scaled.jpg', alt: 'Tour group at Sachsenhausen memorial' },
-  { src: '/images/gallery/DSCF5948-min-scaled.jpg', alt: 'Memorial structures at Sachsenhausen' },
-  { src: '/images/gallery/DSCF5956-min-scaled.jpg', alt: 'Historical exhibits inside the memorial' },
-  { src: '/images/gallery/DSCF5958-min-scaled.jpg', alt: 'Walking through the memorial grounds' },
-  { src: '/images/gallery/DSCF5967-min-scaled.jpg', alt: 'Sachsenhausen camp grounds with visitors' },
-  { src: '/images/gallery/DSCF5969-min-scaled.jpg', alt: 'Guard tower and perimeter wall' },
-  { src: '/images/gallery/DSCF5971-min-scaled.jpg', alt: 'Guide leading group at Sachsenhausen' },
-  { src: '/images/gallery/DSCF6098-scaled.jpg', alt: 'Tour group learning about the memorial history' },
+  { src: '/images/gallery/DSCF5931-min-scaled.jpg', alt: 'Entrance gate of the Sachsenhausen concentration camp near Berlin Germany' },
+  { src: '/images/gallery/DSCF5939-min-scaled.jpg', alt: 'Sachsenhausen concentration camp memorial grounds during a guided tour from Berlin' },
+  { src: '/images/gallery/DSCF5947-min-1-scaled.jpg', alt: 'Tour group visiting Sachsenhausen camp Berlin with a historian guide' },
+  { src: '/images/gallery/DSCF5948-min-scaled.jpg', alt: 'Historical structures at the Sachsenhausen concentration camp memorial' },
+  { src: '/images/gallery/DSCF5956-min-scaled.jpg', alt: 'Exhibits inside the Sachsenhausen memorial — a historical place to visit in Berlin' },
+  { src: '/images/gallery/DSCF5958-min-scaled.jpg', alt: 'Walking through the Sachsenhausen concentration camp memorial site' },
+  { src: '/images/gallery/DSCF5967-min-scaled.jpg', alt: 'Visitors on a Sachsenhausen tour from Berlin exploring the camp grounds' },
+  { src: '/images/gallery/DSCF5969-min-scaled.jpg', alt: 'Guard tower and perimeter wall at the concentration camp near Berlin' },
+  { src: '/images/gallery/DSCF5971-min-scaled.jpg', alt: 'Guide leading a Berlin concentration camp tour at Sachsenhausen' },
+  { src: '/images/gallery/DSCF6098-scaled.jpg', alt: 'Sachsenhausen tour Berlin — group learning about the memorial history' },
 ]
 
 const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?text=${encodeURIComponent('Hi! I would like to book the Sachsenhausen Tour.')}`
@@ -67,7 +75,7 @@ export default function HomePage() {
         {/* Background */}
         <Image
           src="/images/gallery/DSCF5931-min-scaled.jpg"
-          alt="Sachsenhausen Memorial — guided tour from Berlin"
+          alt="Sachsenhausen tour Berlin — guided concentration camp memorial tour from Berlin"
           fill
           className="object-cover"
           priority
@@ -222,11 +230,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-10">
             <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-              Sachsenhausen Concentration Camp Memorial Tour
+              Sachsenhausen Concentration Camp Tour from Berlin
             </h2>
             <p className="mt-4 mx-auto max-w-3xl text-text-muted leading-relaxed">
-              Take a guided tour of the <strong>Sachsenhausen Concentration Camp</strong> memorial with expert historians.
-              Discover the brutal history of the facility that served as a model for the entire Nazi camp system and as
+              Our <strong>Sachsenhausen concentration camp memorial tour</strong> is led by expert historians and departs daily from Berlin.
+              Discover the history of the facility that served as a model for the entire Nazi camp system and as
               an administrative centre for camps across Europe.
             </p>
           </div>
@@ -301,7 +309,7 @@ export default function HomePage() {
           <figure className="overflow-hidden rounded-xl">
             <Image
               src="/images/gallery/DSCF5936-min-scaled.jpg"
-              alt="Preserved barracks at the Sachsenhausen concentration camp memorial site"
+              alt="Preserved barracks at the Sachsenhausen concentration camp near Berlin Germany"
               width={600}
               height={400}
               className="h-64 w-full object-cover"
@@ -349,7 +357,7 @@ export default function HomePage() {
             <figure className="overflow-hidden rounded-xl shadow-lg">
               <Image
                 src="/images/gallery/DSCF6098-scaled.jpg"
-                alt="Tour guide explaining the history of Sachsenhausen to a group of visitors at the memorial"
+                alt="Sachsenhausen concentration camp tour — guide explaining the history to visitors from Berlin"
                 width={760}
                 height={507}
                 className="h-full w-full object-cover"
@@ -526,9 +534,9 @@ export default function HomePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'TouristTrip',
-            name: 'Sachsenhausen Concentration Camp Memorial Tour from Berlin',
+            name: 'Sachsenhausen Tour Berlin — Concentration Camp Memorial Tour from Berlin',
             description:
-              'Historian-led 6-hour guided tour from Berlin to Sachsenhausen Memorial. Small groups, expert context, free cancellation.',
+              'Book the top-rated Sachsenhausen tour from Berlin. 6-hour guided concentration camp memorial tour with expert historians. Visit the Sachsenhausen concentration camp near Berlin Germany.',
             url: 'https://sachsenhausentour.de',
             touristType: 'History & Memorial',
             itinerary: {

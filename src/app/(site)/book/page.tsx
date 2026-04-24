@@ -18,9 +18,9 @@ import { siteConfig } from '@/config/site'
 import { bookContent } from '@/content/en/book'
 
 export const metadata: Metadata = {
-  title: 'Book Your Tour',
+  title: 'Book Sachsenhausen Tour Berlin — Concentration Camp Tickets & Availability',
   description:
-    'Reserve your guided Sachsenhausen Memorial tour from Berlin. €29 per person. Daily at 10 AM. Free cancellation.',
+    'Book your Sachsenhausen tour from Berlin online. Sachsenhausen concentration camp tickets from €29 per person. Daily departures at 10 AM, free cancellation, small groups.',
 }
 
 const iconMap = {

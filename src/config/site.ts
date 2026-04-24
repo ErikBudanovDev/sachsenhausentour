@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: 'Sachsenhausen Tour',
   description:
-    'Guided 6-hour journey from Berlin to Sachsenhausen Memorial. Led by historians trained in Holocaust education.',
+    'Sachsenhausen tour Berlin — guided 6-hour concentration camp memorial tour from Berlin. Led by historians trained in Holocaust education. Book online from €29.',
   url: 'https://sachsenhausentour.de',
   ogImage: '/images/og-default.jpg',
   locale: 'en',

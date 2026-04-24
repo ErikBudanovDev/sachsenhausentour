@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { Section } from '@/components/ui'
 
 export const metadata: Metadata = {
-  title: 'Contact',
-  description: 'Get in touch with questions about our Sachsenhausen Memorial tours.',
+  title: 'Contact Us — Sachsenhausen Tour Berlin',
+  description: 'Get in touch with questions about our Sachsenhausen tour Berlin. Ask about concentration camp memorial tour availability, group bookings, and custom tours.',
 }
 
 export default function ContactPage() {
