@@ -1,12 +1,18 @@
-import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+  })
 
   // Protect /admin routes (except login page)
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    if (!req.auth) {
+    if (!token) {
       const loginUrl = new URL('/admin/login', req.url)
       loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
@@ -15,13 +21,13 @@ export default auth((req) => {
 
   // Protect /api/admin routes
   if (pathname.startsWith('/api/admin')) {
-    if (!req.auth) {
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ['/admin/:path*', '/api/admin/:path*'],
