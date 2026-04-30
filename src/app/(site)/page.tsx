@@ -226,6 +226,17 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════ REVIEWS (social proof early) ═══════════════ */}
+      <ReviewSlider
+        heading="What Our Visitors Say"
+        subheading="Verified reviews from guests on Google and Tripadvisor."
+        reviews={reviewsData as Review[]}
+        avgRating="4.7"
+        totalReviews="4,363"
+        googleCount="1,667"
+        tripadvisorCount="2,696"
+      />
+
       {/* ═══════════════ 2. OVERVIEW / HIGHLIGHTS ═══════════════ */}
       <Section id="tour-details" spacing="lg">
         <div className="mx-auto max-w-5xl">
@@ -502,17 +513,6 @@ export default function HomePage() {
           </div>
         </div>
       </Section>
-
-      {/* ═══════════════ REVIEWS ═══════════════ */}
-      <ReviewSlider
-        heading="What Our Visitors Say"
-        subheading="Verified reviews from guests on Google and Tripadvisor."
-        reviews={reviewsData as Review[]}
-        avgRating="4.7"
-        totalReviews="4,363"
-        googleCount="1,667"
-        tripadvisorCount="2,696"
-      />
 
       {/* ═══════════════ 11. FAQs ═══════════════ */}
       <Section spacing="lg">

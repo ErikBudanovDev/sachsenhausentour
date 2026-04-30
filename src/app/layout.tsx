@@ -1,10 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display, EB_Garamond } from 'next/font/google'
 import { siteConfig } from '@/config/site'
-import { Nav } from '@/components/layout/Nav'
-import { Footer } from '@/components/layout/Footer'
-import { WhatsAppButton } from '@/components/ui'
-import { OrganizationSchema } from '@/components/seo/OrganizationSchema'
 import './globals.css'
 
 const inter = Inter({
@@ -85,11 +81,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${garamond.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-primary text-navy font-body">
-        <Nav />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <WhatsAppButton />
-        <OrganizationSchema />
+        {children}
       </body>
     </html>
   )

@@ -11,10 +11,13 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^6.3.0",
     "@stripe/stripe-js": "^9.3.1",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
+    "mongoose": "^9.6.1",
     "next": "16.2.3",
+    "next-auth": "^5.0.0-beta.31",
     "next-intl": "^4.9.1",
     "nodemailer": "^8.0.7",
     "react": "19.2.4",
@@ -24,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "20.19.39",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "19.2.14",
