@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { connectDB } from '@/lib/mongodb'
+import { Booking } from '@/models/Booking'
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -130,6 +132,35 @@ export async function POST(request: Request) {
         { error: 'Missing required fields' },
         { status: 400 }
       )
+    }
+
+    // Save booking to MongoDB (idempotent — won't duplicate if webhook also fires)
+    try {
+      await connectDB()
+      const totalCents = Math.round(parseFloat(total.replace(/[^0-9.]/g, '')) * 100)
+      const guestCount = typeof guests === 'string' ? parseInt(guests, 10) : guests
+      await Booking.findOneAndUpdate(
+        { stripePaymentId: paymentId },
+        {
+          $setOnInsert: {
+            stripePaymentId: paymentId,
+            customerName: name,
+            customerEmail: email.toLowerCase(),
+            customerPhone: phone || undefined,
+            tourDate: date,
+            tourTime: time,
+            guests: guestCount,
+            pricePerPerson: Math.round(totalCents / guestCount),
+            totalPaid: totalCents,
+            currency: 'eur',
+            status: 'confirmed',
+          },
+        },
+        { upsert: true, new: true }
+      )
+    } catch (dbErr) {
+      console.error('DB save error (non-fatal):', dbErr)
+      // Don't fail the response — payment already went through
     }
 
     // Send customer confirmation
