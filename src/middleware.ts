@@ -5,9 +5,17 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  const isSecure = req.url.startsWith('https')
+  const cookieName = isSecure
+    ? '__Secure-authjs.session-token'
+    : 'authjs.session-token'
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
+    cookieName,
+    secureCookie: isSecure,
+    salt: cookieName,
   })
 
   // Protect /admin routes (except login page)
