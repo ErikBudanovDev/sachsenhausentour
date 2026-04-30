@@ -343,7 +343,7 @@ export default function HomePage() {
       <Section background="secondary" spacing="lg">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl mb-8">{c.whyBook.heading}</h2>
-          <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
             <div className="space-y-4">
               {c.whyBook.differentiators.map((d, i) => (
                 <div key={i} className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm">
@@ -354,15 +354,26 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <figure className="overflow-hidden rounded-xl shadow-lg">
-              <Image
-                src="/images/gallery/DSCF6098-scaled.jpg"
-                alt="Sachsenhausen concentration camp tour — guide explaining the history to visitors from Berlin"
-                width={760}
-                height={507}
-                className="h-full w-full object-cover"
-              />
-            </figure>
+            <div className="space-y-4">
+              <figure className="overflow-hidden rounded-xl shadow-lg">
+                <Image
+                  src="/images/gallery/DSCF5939-min-scaled.jpg"
+                  alt="Sachsenhausen Memorial entrance gate — concentration camp near Berlin Germany"
+                  width={760}
+                  height={507}
+                  className="h-56 w-full object-cover"
+                />
+              </figure>
+              <figure className="overflow-hidden rounded-xl shadow-lg">
+                <Image
+                  src="/images/gallery/DSCF6098-scaled.jpg"
+                  alt="Sachsenhausen concentration camp tour — small group guided experience from Berlin"
+                  width={760}
+                  height={507}
+                  className="h-56 w-full object-cover"
+                />
+              </figure>
+            </div>
           </div>
         </div>
       </Section>
@@ -494,10 +505,12 @@ export default function HomePage() {
       {/* ═══════════════ REVIEWS ═══════════════ */}
       <ReviewSlider
         heading="What Our Visitors Say"
-        subheading="Verified reviews from guests on Google."
+        subheading="Verified reviews from guests on Google and Tripadvisor."
         reviews={reviewsData as Review[]}
-        avgRating="4.8"
-        totalReviews="320+"
+        avgRating="4.7"
+        totalReviews="4,363"
+        googleCount="1,667"
+        tripadvisorCount="2,696"
       />
 
       {/* ═══════════════ 11. FAQs ═══════════════ */}
