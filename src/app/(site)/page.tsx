@@ -17,6 +17,7 @@ import {
 import { homeContent } from '@/content/en/home'
 import { Section, Button, Card, Accordion } from '@/components/ui'
 import { FAQSchema } from '@/components/seo/FAQSchema'
+import { TourSchema } from '@/components/seo/TourSchema'
 import { MobileBookingBar } from '@/components/sections/MobileBookingBar'
 import { GallerySlider } from '@/components/sections/GallerySlider'
 import { VisitorInfo } from '@/components/sections/VisitorInfo'
@@ -541,57 +542,7 @@ export default function HomePage() {
 
       {/* Structured Data */}
       <FAQSchema items={c.faq.items} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'TouristTrip',
-            name: 'Sachsenhausen Tour Berlin — Concentration Camp Memorial Tour from Berlin',
-            description:
-              'Book the top-rated Sachsenhausen tour from Berlin. 6-hour guided concentration camp memorial tour with expert historians. Visit the Sachsenhausen concentration camp near Berlin Germany.',
-            url: 'https://sachsenhausentour.de',
-            touristType: 'History & Memorial',
-            itinerary: {
-              '@type': 'ItemList',
-              itemListElement: c.timeline.stops.map((stop, i) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                name: stop.title,
-                description: stop.description,
-              })),
-            },
-            offers: {
-              '@type': 'Offer',
-              price: '29',
-              priceCurrency: 'EUR',
-              availability: 'https://schema.org/InStock',
-              url: 'https://sachsenhausentour.de/book',
-              validFrom: '2024-01-01',
-            },
-            provider: {
-              '@type': 'TourOperator',
-              name: 'Be Original Tours',
-              url: 'https://sachsenhausentour.de',
-              telephone: siteConfig.whatsapp,
-              email: siteConfig.email,
-              address: {
-                '@type': 'PostalAddress',
-                streetAddress: 'Otto-Braun-Straße 65',
-                addressLocality: 'Berlin',
-                postalCode: '10178',
-                addressCountry: 'DE',
-              },
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.8',
-              reviewCount: '320',
-              bestRating: '5',
-            },
-          }),
-        }}
-      />
+      <TourSchema />
 
       {/* Sticky mobile booking bar */}
       <MobileBookingBar />

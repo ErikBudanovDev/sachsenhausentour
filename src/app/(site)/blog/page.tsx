@@ -6,6 +6,12 @@ import { Section } from '@/components/ui'
 export const metadata: Metadata = {
   title: 'Blog — Sachsenhausen History, Berlin Tours & Memorial Guides',
   description: 'Articles about the Sachsenhausen concentration camp near Berlin Germany, visiting tips, historical places to visit in Berlin, and Holocaust education guides.',
+  alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'Blog — Sachsenhausen History & Memorial Guides',
+    description: 'Articles about the Sachsenhausen concentration camp, visiting tips, and Holocaust education guides.',
+    url: '/blog',
+  },
 }
 
 const blogPosts = [

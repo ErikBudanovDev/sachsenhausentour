@@ -372,7 +372,7 @@ export function ReviewSlider({
         </a>
         {' & '}
         <a
-          href="https://www.tripadvisor.com/Attraction_Review-g187323-d12160599-Reviews-Be_Original_Tours-Berlin.html"
+          href="https://www.tripadvisor.com/AttractionProductReview-g187323-d12934907-From_Berlin_Sachsenhausen_Concentration_Camp_Memorial_Tour-Berlin.html"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-accent hover:underline"

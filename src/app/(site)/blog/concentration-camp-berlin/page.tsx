@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Section, Button } from '@/components/ui'
 import { FAQSchema } from '@/components/seo/FAQSchema'
-import { AuthorCard, AuthorSchema } from '@/components/seo/AuthorCard'
+import { AuthorSchema } from '@/components/seo/AuthorCard'
 import { teamMembers } from '@/content/en/team'
 
 export const metadata: Metadata = {
@@ -66,13 +66,6 @@ export default function ConcentrationCampBerlinPost() {
           </p>
         </div>
       </section>
-
-      {/* Author */}
-      <Section spacing="md">
-        <div className="mx-auto max-w-3xl">
-          <AuthorCard author={author} publishedDate="2025-03-15" updatedDate="2025-06-01" />
-        </div>
-      </Section>
 
       {/* Article Body */}
       <Section spacing="lg">

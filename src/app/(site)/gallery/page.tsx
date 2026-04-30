@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: 'Sachsenhausen Camp Berlin — Tour Photos & Memorial Gallery',
   description:
     'Photos from our Sachsenhausen tour Berlin. See images of the Sachsenhausen concentration camp memorial, guided tour groups, and the historical site near Berlin Germany.',
+  alternates: { canonical: '/gallery' },
+  openGraph: {
+    title: 'Sachsenhausen Tour Photos & Memorial Gallery',
+    description: 'Photos from our Sachsenhausen tour Berlin — the memorial, guided groups, and the historical site.',
+    url: '/gallery',
+  },
 }
 
 const galleryImages = [

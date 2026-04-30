@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   title: 'About Us — The Historians Behind the Best Berlin Concentration Camp Tour',
   description:
     'Meet the team behind the #1 rated Sachsenhausen tour Berlin. Our historians lead guided concentration camp tours from Berlin to one of the most important historical places to visit in Berlin.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Us — Sachsenhausen Tour Berlin',
+    description: 'Meet the historians behind the #1 rated Sachsenhausen tour from Berlin.',
+    url: '/about',
+  },
 }
 
 const values = [

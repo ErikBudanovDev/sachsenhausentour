@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   title: 'Book Sachsenhausen Tour Berlin — Concentration Camp Tickets & Availability',
   description:
     'Book your Sachsenhausen tour from Berlin online. Sachsenhausen concentration camp tickets from €29 per person. Daily departures at 10 AM, free cancellation, small groups.',
+  alternates: { canonical: '/book' },
+  openGraph: {
+    title: 'Book Sachsenhausen Tour — Tickets & Availability',
+    description: 'Book your Sachsenhausen concentration camp tour from Berlin. €29 per person, daily departures, free cancellation.',
+    url: '/book',
+  },
 }
 
 const iconMap = {

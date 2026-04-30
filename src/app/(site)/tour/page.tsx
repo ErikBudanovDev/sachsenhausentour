@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: 'Sachsenhausen Concentration Camp Memorial Tour — Tour Details & Itinerary',
   description:
     'Full details of our Sachsenhausen concentration camp memorial tour from Berlin. See the itinerary, what to expect on this guided tour of the Sachsenhausen concentration camp, tickets info, and meeting point.',
+  alternates: { canonical: '/tour' },
+  openGraph: {
+    title: 'Sachsenhausen Memorial Tour — Details & Itinerary',
+    description: 'Full details of our Sachsenhausen concentration camp memorial tour from Berlin. See the itinerary, what to expect, and meeting point.',
+    url: '/tour',
+  },
 }
 
 export default function TourPage() {
