@@ -78,11 +78,11 @@ export function BookingWidget({
 
   const shortDateLabel = useMemo(() => {
     if (!selectedDate) return ''
-    return selectedDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
+    // ISO format YYYY-MM-DD — matches blackout dates and DB storage
+    const y = selectedDate.getFullYear()
+    const m = String(selectedDate.getMonth() + 1).padStart(2, '0')
+    const d = String(selectedDate.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
   }, [selectedDate])
 
   const selectedSlotData = useMemo(

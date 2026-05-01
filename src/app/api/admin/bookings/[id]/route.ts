@@ -39,6 +39,11 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Require admin role for booking mutations
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+  }
+
   await connectDB()
   const { id } = await params
   const body = await request.json()
@@ -47,6 +52,33 @@ export async function PATCH(
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (body[key] !== undefined) update[key] = body[key]
+  }
+
+  // Validate status transitions
+  if (update.status) {
+    const validStatuses = ['confirmed', 'cancelled', 'refunded']
+    if (!validStatuses.includes(update.status as string)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 })
+    }
+
+    // If changing status, verify it's a valid transition
+    const booking = await Booking.findById(id).lean()
+    if (!booking) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    }
+    const currentStatus = (booking as { status?: string }).status
+    const validTransitions: Record<string, string[]> = {
+      confirmed: ['cancelled'],
+      cancelled: ['refunded'],
+      refunded: [],
+    }
+    if (currentStatus && validTransitions[currentStatus] &&
+        !validTransitions[currentStatus].includes(update.status as string)) {
+      return NextResponse.json(
+        { error: `Cannot transition from ${currentStatus} to ${update.status}` },
+        { status: 400 }
+      )
+    }
   }
 
   // Handle cancellation with Stripe refund

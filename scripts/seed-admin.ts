@@ -33,7 +33,12 @@ async function seed() {
   if (existingAdmin) {
     console.log('⚠️  Admin user already exists — skipping')
   } else {
-    const hashed = await bcrypt.hash('Admin2025!', 12)
+    const adminPassword = process.env.ADMIN_PASSWORD
+    if (!adminPassword) {
+      console.error('❌  ADMIN_PASSWORD env var required to create admin user')
+      process.exit(1)
+    }
+    const hashed = await bcrypt.hash(adminPassword, 12)
     await usersCol.insertOne({
       email: 'admin@sachsenhausentour.de',
       password: hashed,
@@ -43,7 +48,7 @@ async function seed() {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    console.log('✅  Admin user created: admin@sachsenhausentour.de / Admin2025!')
+    console.log('✅  Admin user created: admin@sachsenhausentour.de')
   }
 
   // ── 2. Default tour config ─────────────────────────

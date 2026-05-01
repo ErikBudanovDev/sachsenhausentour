@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import Stripe from 'stripe'
+import { getStripeSecretKey } from '@/lib/stripe'
 import { connectDB } from '@/lib/mongodb'
 import { Booking } from '@/models/Booking'
+
+const stripe = new Stripe(getStripeSecretKey(), {
+  apiVersion: '2026-04-22.dahlia',
+})
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -12,6 +18,10 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS,
   },
 })
+
+function esc(s: string) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+}
 
 function buildCustomerEmail(booking: {
   name: string
@@ -125,20 +135,53 @@ Stripe Payment: ${booking.paymentId}
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, phone, date, time, guests, total, paymentId } = body
+    const { paymentId } = body
 
-    if (!name || !email || !date || !time || !guests) {
+    if (!paymentId) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing payment ID' },
         { status: 400 }
       )
     }
 
-    // Save booking to MongoDB (idempotent — won't duplicate if webhook also fires)
+    // Verify payment with Stripe — never trust the client
+    let pi: Stripe.PaymentIntent
+    try {
+      pi = await stripe.paymentIntents.retrieve(paymentId)
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid payment ID' },
+        { status: 400 }
+      )
+    }
+
+    if (pi.status !== 'succeeded') {
+      return NextResponse.json(
+        { error: 'Payment not verified' },
+        { status: 400 }
+      )
+    }
+
+    // Use verified data from Stripe metadata — not client body
+    const name = pi.metadata.name || body.name || ''
+    const email = pi.metadata.email || body.email || ''
+    const phone = pi.metadata.phone || body.phone || ''
+    const date = pi.metadata.date || body.date || ''
+    const time = pi.metadata.time || body.time || ''
+    const guests = parseInt(pi.metadata.guests || body.guests || '1', 10)
+    const totalCents = pi.amount
+    const currency = pi.currency || 'eur'
+
+    if (!name || !email || !date || !time) {
+      return NextResponse.json(
+        { error: 'Incomplete booking data in payment' },
+        { status: 400 }
+      )
+    }
+
+    // Save booking to MongoDB (idempotent)
     try {
       await connectDB()
-      const totalCents = Math.round(parseFloat(total.replace(/[^0-9.]/g, '')) * 100)
-      const guestCount = typeof guests === 'string' ? parseInt(guests, 10) : guests
       await Booking.findOneAndUpdate(
         { stripePaymentId: paymentId },
         {
@@ -149,10 +192,10 @@ export async function POST(request: Request) {
             customerPhone: phone || undefined,
             tourDate: date,
             tourTime: time,
-            guests: guestCount,
-            pricePerPerson: Math.round(totalCents / guestCount),
+            guests,
+            pricePerPerson: Math.round(totalCents / guests),
             totalPaid: totalCents,
-            currency: 'eur',
+            currency,
             status: 'confirmed',
           },
         },
@@ -160,15 +203,16 @@ export async function POST(request: Request) {
       )
     } catch (dbErr) {
       console.error('DB save error (non-fatal):', dbErr)
-      // Don't fail the response — payment already went through
     }
+
+    const totalDisplay = `€${(totalCents / 100).toFixed(2)}`
 
     // Send customer confirmation
     await transporter.sendMail({
       from: `"Sachsenhausen Tour" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: `Booking Confirmed — Sachsenhausen Tour on ${date}`,
-      html: buildCustomerEmail({ name, date, time, guests, total }),
+      subject: `Booking Confirmed — Sachsenhausen Tour on ${esc(date)}`,
+      html: buildCustomerEmail({ name: esc(name), date: esc(date), time: esc(time), guests, total: totalDisplay }),
     })
 
     // Send internal notification
@@ -176,13 +220,12 @@ export async function POST(request: Request) {
       from: `"Booking System" <${process.env.SMTP_USER}>`,
       to: 'service@beoriginaltours.com',
       subject: `New Booking: ${name} — ${guests} guests on ${date}`,
-      text: buildInternalEmail({ name, email, phone, date, time, guests, total, paymentId }),
+      text: buildInternalEmail({ name, email, phone, date, time, guests, total: totalDisplay, paymentId }),
     })
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('Email error:', err)
-    // Don't fail the booking if email fails — payment already went through
-    return NextResponse.json({ success: false, error: 'Email sending failed' })
+    console.error('Confirm error:', err)
+    return NextResponse.json({ success: false, error: 'Confirmation failed' })
   }
 }

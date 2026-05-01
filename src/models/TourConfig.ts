@@ -47,5 +47,27 @@ const TourConfigSchema = new Schema<ITourConfig>(
   { timestamps: true }
 )
 
+// Enforce singleton: when setting active=true, deactivate all others
+TourConfigSchema.pre('save', async function () {
+  if (this.isModified('active') && this.active) {
+    await mongoose.model('TourConfig').updateMany(
+      { _id: { $ne: this._id }, active: true },
+      { $set: { active: false } }
+    )
+  }
+})
+
+// Also handle findOneAndUpdate
+TourConfigSchema.pre('findOneAndUpdate', async function () {
+  const update = this.getUpdate() as Record<string, unknown>
+  if (update?.active === true || (update?.$set as Record<string, unknown>)?.active === true) {
+    const docId = this.getQuery()._id
+    await mongoose.model('TourConfig').updateMany(
+      { _id: { $ne: docId }, active: true },
+      { $set: { active: false } }
+    )
+  }
+})
+
 export const TourConfig =
   mongoose.models.TourConfig || mongoose.model<ITourConfig>('TourConfig', TourConfigSchema)

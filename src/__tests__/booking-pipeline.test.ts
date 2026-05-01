@@ -19,6 +19,8 @@ const mockBooking = {
   create: vi.fn(),
   findOne: vi.fn(),
   findOneAndUpdate: vi.fn(),
+  findById: vi.fn(),
+  findByIdAndUpdate: vi.fn(),
   find: vi.fn().mockReturnValue({
     sort: vi.fn().mockReturnValue({
       skip: vi.fn().mockReturnValue({
@@ -70,12 +72,18 @@ vi.mock('@/models/TourConfig', () => ({
 
 // Mock Stripe
 const mockPaymentIntentsCreate = vi.fn()
+const mockPaymentIntentsRetrieve = vi.fn()
+const mockRefundsCreate = vi.fn()
 const mockWebhooksConstructEvent = vi.fn()
 
 vi.mock('stripe', () => {
   const StripeMock = function () {
     return {
-      paymentIntents: { create: mockPaymentIntentsCreate },
+      paymentIntents: {
+        create: mockPaymentIntentsCreate,
+        retrieve: mockPaymentIntentsRetrieve,
+      },
+      refunds: { create: mockRefundsCreate },
       webhooks: { constructEvent: mockWebhooksConstructEvent },
     }
   }
@@ -94,11 +102,13 @@ vi.mock('nodemailer', () => ({
   },
 }))
 
-// Mock NextAuth
+// Mock NextAuth — importable so we can override per-test
+const mockAuth = vi.fn().mockResolvedValue({
+  user: { id: '1', email: 'admin@sachsenhausentour.de', role: 'admin' },
+})
+
 vi.mock('@/lib/auth', () => ({
-  auth: vi.fn().mockResolvedValue({
-    user: { id: '1', email: 'admin@sachsenhausentour.de', role: 'admin' },
-  }),
+  auth: (...args: unknown[]) => mockAuth(...args),
 }))
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -116,6 +126,27 @@ function resetTourConfigMock(overrides: Record<string, unknown> = {}) {
   mockTourConfig.findOne.mockReturnValue({
     lean: vi.fn().mockResolvedValue({ ...DEFAULT_TOUR_CONFIG, ...overrides }),
   })
+}
+
+/** Create a mock verified PaymentIntent for confirm tests */
+function mockVerifiedPayment(overrides: Record<string, unknown> = {}) {
+  const pi = {
+    id: 'pi_test_123',
+    status: 'succeeded',
+    amount: 17700,
+    currency: 'eur',
+    metadata: {
+      name: 'Erik Budanov',
+      email: 'erik@test.com',
+      phone: '+491234567',
+      date: '2026-06-15',
+      time: '10:00 AM',
+      guests: '3',
+    },
+    ...overrides,
+  }
+  mockPaymentIntentsRetrieve.mockResolvedValue(pi)
+  return pi
 }
 
 /** Reset Booking mocks including find chains */
@@ -427,7 +458,7 @@ describe('POST /api/checkout', () => {
   })
 })
 
-// ─── 3. Confirm API (booking save + emails) ──────────────────
+// ─── 3. Confirm API (Stripe-verified booking save + emails) ──
 
 describe('POST /api/checkout/confirm', () => {
   beforeEach(() => {
@@ -436,19 +467,29 @@ describe('POST /api/checkout/confirm', () => {
       _id: 'booking-1',
       stripePaymentId: 'pi_test_123',
     })
+    mockVerifiedPayment()
   })
 
-  it('saves booking to MongoDB on confirmation', async () => {
+  it('verifies payment with Stripe before saving', async () => {
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_123' })
+
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(data.success).toBe(true)
+    expect(mockPaymentIntentsRetrieve).toHaveBeenCalledWith('pi_test_123')
+  })
+
+  it('saves booking using Stripe-verified data, not client data', async () => {
     const { POST } = await import('@/app/api/checkout/confirm/route')
     const req = makeRequest({
-      name: 'Erik Budanov',
-      email: 'erik@test.com',
-      phone: '+491234567',
-      date: '2026-06-15',
-      time: '10:00 AM',
-      guests: 3,
-      total: '€177',
       paymentId: 'pi_test_123',
+      // Client sends different values — these should be ignored
+      name: 'FAKE NAME',
+      email: 'fake@evil.com',
+      guests: 999,
+      total: '€0.01',
     })
 
     const res = await POST(req)
@@ -459,10 +500,10 @@ describe('POST /api/checkout/confirm', () => {
       { stripePaymentId: 'pi_test_123' },
       expect.objectContaining({
         $setOnInsert: expect.objectContaining({
-          customerName: 'Erik Budanov',
+          customerName: 'Erik Budanov', // From Stripe metadata, not client
           customerEmail: 'erik@test.com',
           guests: 3,
-          totalPaid: 17700,
+          totalPaid: 17700, // From pi.amount, not client
           status: 'confirmed',
         }),
       }),
@@ -470,17 +511,59 @@ describe('POST /api/checkout/confirm', () => {
     )
   })
 
-  it('sends customer confirmation email', async () => {
-    const { POST } = await import('@/app/api/checkout/confirm/route')
-    const req = makeRequest({
-      name: 'Test User',
-      email: 'test@example.com',
-      date: '2026-06-15',
-      time: '10:00 AM',
-      guests: 1,
-      total: '€59',
-      paymentId: 'pi_abc',
+  it('rejects when payment has not succeeded', async () => {
+    mockPaymentIntentsRetrieve.mockResolvedValue({
+      id: 'pi_pending',
+      status: 'requires_payment_method',
+      amount: 5900,
+      currency: 'eur',
+      metadata: {},
     })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_pending' })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/not verified/i)
+  })
+
+  it('rejects invalid payment ID', async () => {
+    mockPaymentIntentsRetrieve.mockRejectedValue(new Error('No such payment_intent'))
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_nonexistent' })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/invalid payment/i)
+  })
+
+  it('rejects request without paymentId', async () => {
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ name: 'No Payment' })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/missing payment/i)
+  })
+
+  it('sends customer confirmation email with verified data', async () => {
+    mockVerifiedPayment({
+      metadata: {
+        name: 'Test User',
+        email: 'test@example.com',
+        date: '2026-06-15',
+        time: '10:00 AM',
+        guests: '1',
+      },
+    })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_123' })
 
     await POST(req)
 
@@ -495,15 +578,7 @@ describe('POST /api/checkout/confirm', () => {
 
   it('sends internal notification email', async () => {
     const { POST } = await import('@/app/api/checkout/confirm/route')
-    const req = makeRequest({
-      name: 'Test User',
-      email: 'test@example.com',
-      date: '2026-06-15',
-      time: '10:00 AM',
-      guests: 2,
-      total: '€118',
-      paymentId: 'pi_xyz',
-    })
+    const req = makeRequest({ paymentId: 'pi_test_123' })
 
     await POST(req)
 
@@ -515,27 +590,11 @@ describe('POST /api/checkout/confirm', () => {
     )
   })
 
-  it('rejects request with missing fields', async () => {
-    const { POST } = await import('@/app/api/checkout/confirm/route')
-    const req = makeRequest({ name: 'Incomplete' })
-
-    const res = await POST(req)
-    expect(res.status).toBe(400)
-  })
-
   it('still returns success if DB save fails', async () => {
     mockBooking.findOneAndUpdate.mockRejectedValue(new Error('DB down'))
 
     const { POST } = await import('@/app/api/checkout/confirm/route')
-    const req = makeRequest({
-      name: 'Test',
-      email: 'test@test.com',
-      date: '2026-06-15',
-      time: '10:00 AM',
-      guests: 1,
-      total: '€59',
-      paymentId: 'pi_fail',
-    })
+    const req = makeRequest({ paymentId: 'pi_test_123' })
 
     const res = await POST(req)
     const data = await res.json()
@@ -545,21 +604,31 @@ describe('POST /api/checkout/confirm', () => {
   it('is idempotent — uses upsert to avoid duplicates', async () => {
     const { POST } = await import('@/app/api/checkout/confirm/route')
 
-    const body = {
-      name: 'Test',
-      email: 'test@test.com',
-      date: '2026-06-15',
-      time: '10:00 AM',
-      guests: 1,
-      total: '€59',
-      paymentId: 'pi_duplicate',
-    }
-
-    await POST(makeRequest(body))
-    await POST(makeRequest(body))
+    await POST(makeRequest({ paymentId: 'pi_test_123' }))
+    await POST(makeRequest({ paymentId: 'pi_test_123' }))
 
     const calls = mockBooking.findOneAndUpdate.mock.calls
     expect(calls.every((c: unknown[]) => (c[2] as { upsert: boolean }).upsert === true)).toBe(true)
+  })
+
+  it('uses pi.amount and pi.currency instead of client total', async () => {
+    mockVerifiedPayment({ amount: 23600, currency: 'usd' })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_123', total: '€0.01' })
+
+    await POST(req)
+
+    expect(mockBooking.findOneAndUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        $setOnInsert: expect.objectContaining({
+          totalPaid: 23600,
+          currency: 'usd',
+        }),
+      }),
+      expect.anything()
+    )
   })
 })
 
@@ -1002,5 +1071,542 @@ describe('Admin config changes propagate to booking flow', () => {
     expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 4200 })
     )
+  })
+})
+
+// ─── 8. Booking mutation role checks & status validation ─────
+
+describe('PATCH /api/admin/bookings/[id]', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAuth.mockResolvedValue({
+      user: { id: '1', email: 'admin@sachsenhausentour.de', role: 'admin' },
+    })
+    mockBooking.findOneAndUpdate.mockResolvedValue({ _id: 'b1', status: 'confirmed' })
+    mockBooking.findByIdAndUpdate.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed', notes: 'VIP guest' }),
+    })
+  })
+
+  it('allows admin to update booking notes', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ notes: 'VIP guest' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+    const data = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(data.booking).toBeDefined()
+  })
+
+  it('rejects non-admin users with 403', async () => {
+    mockAuth.mockResolvedValue({
+      user: { id: '2', email: 'staff@test.com', role: 'staff' },
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ notes: 'Should fail' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(403)
+    const data = await res.json()
+    expect(data.error).toMatch(/admin/i)
+  })
+
+  it('rejects unauthenticated users with 401', async () => {
+    mockAuth.mockResolvedValue(null)
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ notes: 'No auth' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(401)
+  })
+
+  it('rejects invalid status values', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ status: 'fake_status' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/invalid status/i)
+  })
+
+  it('rejects invalid status transition (confirmed → refunded)', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ status: 'refunded' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/cannot transition/i)
+  })
+
+  it('allows valid status transition (confirmed → cancelled)', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ status: 'cancelled' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(200)
+  })
+
+  it('admin can cancel and trigger Stripe refund', async () => {
+    mockBooking.findById.mockResolvedValue({
+      _id: 'b1',
+      stripePaymentId: 'pi_to_refund',
+      status: 'confirmed',
+    })
+    mockRefundsCreate.mockResolvedValue({ id: 'refund_1' })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ action: 'cancel' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(200)
+    expect(mockRefundsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ payment_intent: 'pi_to_refund' })
+    )
+  })
+})
+
+// ─── 9. Date format consistency ────────────────────────────────
+
+describe('Date format consistency', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetTourConfigMock()
+    mockBooking.aggregate.mockResolvedValue([])
+  })
+
+  it('checkout accepts ISO dates matching blackout format', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-12-25', // ISO format — matches blackout
+      time: '10:00 AM',
+      name: 'ISO Test',
+      email: 'iso@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400) // Should be blocked
+    const data = await res.json()
+    expect(data.error).toMatch(/not available/i)
+  })
+
+  it('checkout blocks ISO blackout dates correctly', async () => {
+    resetTourConfigMock({
+      blackoutDates: ['2026-07-04'],
+    })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-07-04',
+      time: '10:00 AM',
+      name: 'July 4th',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('checkout allows non-blackout ISO dates', async () => {
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_ok' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-07-05', // Not a blackout
+      time: '10:00 AM',
+      name: 'Open Day',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+  })
+})
+
+// ─── 10. Security: confirm endpoint cannot be abused ──────────
+
+describe('Confirm endpoint security', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBooking.findOneAndUpdate.mockResolvedValue({ _id: 'b1' })
+  })
+
+  it('cannot create fake bookings without valid payment', async () => {
+    mockPaymentIntentsRetrieve.mockRejectedValue(new Error('No such payment_intent'))
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({
+      paymentId: 'pi_fake_12345',
+      name: 'Hacker',
+      email: 'hacker@evil.com',
+      date: '2026-06-15',
+      time: '10:00 AM',
+      guests: 10,
+      total: '€0.01',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    expect(mockBooking.findOneAndUpdate).not.toHaveBeenCalled()
+    expect(mockSendMail).not.toHaveBeenCalled()
+  })
+
+  it('cannot send spam emails without verified payment', async () => {
+    mockPaymentIntentsRetrieve.mockResolvedValue({
+      id: 'pi_processing',
+      status: 'processing',
+      amount: 100,
+      currency: 'eur',
+      metadata: {},
+    })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({
+      paymentId: 'pi_processing',
+      email: 'victim@example.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    expect(mockSendMail).not.toHaveBeenCalled()
+  })
+
+  it('uses Stripe amount, ignoring client-supplied total', async () => {
+    mockVerifiedPayment({ amount: 11800 })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({
+      paymentId: 'pi_test_123',
+      total: '€0.01', // Attacker tries to record low amount
+    })
+
+    await POST(req)
+
+    expect(mockBooking.findOneAndUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        $setOnInsert: expect.objectContaining({
+          totalPaid: 11800, // From Stripe, not from client
+        }),
+      }),
+      expect.anything()
+    )
+  })
+})
+
+// ─── 11. GET /api/admin/bookings/[id] — single booking ─────────
+
+describe('GET /api/admin/bookings/[id]', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAuth.mockResolvedValue({
+      user: { id: '1', email: 'admin@test.com', role: 'admin' },
+    })
+  })
+
+  it('returns a single booking by ID', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({
+        _id: 'b1',
+        customerName: 'Jane',
+        status: 'confirmed',
+      }),
+    })
+
+    const { GET } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({})
+    const res = await GET(req, { params: Promise.resolve({ id: 'b1' }) })
+    const data = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(data.booking.customerName).toBe('Jane')
+  })
+
+  it('returns 404 for non-existent booking', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue(null),
+    })
+
+    const { GET } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({})
+    const res = await GET(req, { params: Promise.resolve({ id: 'nonexistent' }) })
+
+    expect(res.status).toBe(404)
+  })
+
+  it('rejects unauthenticated requests', async () => {
+    mockAuth.mockResolvedValue(null)
+
+    const { GET } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({})
+    const res = await GET(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(401)
+  })
+})
+
+// ─── 12. Checkout input validation edge cases ──────────────────
+
+describe('Checkout input validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetTourConfigMock()
+    mockBooking.aggregate.mockResolvedValue([])
+  })
+
+  it('rejects zero guests', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 0,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects negative guest count', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: -3,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects empty email', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 2,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: '',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects empty name', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 2,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: '',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects missing date field', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 2,
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('calculates correct amount for multiple guests', async () => {
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_multi' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 4,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Group',
+      email: 'group@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 5900 * 4 }) // 4 guests × €59
+    )
+  })
+})
+
+// ─── 13. Confirm email content ─────────────────────────────────
+
+describe('Confirm endpoint email content', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBooking.findOneAndUpdate.mockResolvedValue({ _id: 'b1' })
+  })
+
+  it('HTML-escapes customer name in email to prevent XSS', async () => {
+    mockVerifiedPayment({
+      metadata: {
+        name: '<script>alert("xss")</script>',
+        email: 'safe@test.com',
+        date: '2026-06-15',
+        time: '10:00 AM',
+        guests: '1',
+      },
+    })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_xss' })
+    await POST(req)
+
+    // Customer email should have escaped HTML
+    const customerCall = mockSendMail.mock.calls[0]?.[0]
+    expect(customerCall?.html).not.toContain('<script>')
+    expect(customerCall?.html).toContain('&lt;script&gt;')
+  })
+
+  it('sends email to the correct customer address', async () => {
+    mockVerifiedPayment({
+      metadata: {
+        name: 'Alice',
+        email: 'alice@example.com',
+        date: '2026-06-15',
+        time: '10:00 AM',
+        guests: '2',
+      },
+    })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_email' })
+    await POST(req)
+
+    const customerCall = mockSendMail.mock.calls[0]?.[0]
+    expect(customerCall?.to).toBe('alice@example.com')
+  })
+
+  it('formats total correctly in emails', async () => {
+    mockVerifiedPayment({ amount: 5800 })
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_fmt' })
+    await POST(req)
+
+    const customerCall = mockSendMail.mock.calls[0]?.[0]
+    expect(customerCall?.html).toContain('€58.00')
+  })
+
+  it('sends internal notification to service email', async () => {
+    mockVerifiedPayment()
+
+    const { POST } = await import('@/app/api/checkout/confirm/route')
+    const req = makeRequest({ paymentId: 'pi_test_internal' })
+    await POST(req)
+
+    const internalCall = mockSendMail.mock.calls[1]?.[0]
+    expect(internalCall?.to).toBe('service@beoriginaltours.com')
+  })
+})
+
+// ─── 14. PATCH booking edge cases ──────────────────────────────
+
+describe('PATCH booking edge cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAuth.mockResolvedValue({
+      user: { id: '1', email: 'admin@test.com', role: 'admin' },
+    })
+    mockBooking.findByIdAndUpdate.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+  })
+
+  it('only allows whitelisted fields in update', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'confirmed' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({
+      notes: 'ok',
+      totalPaid: 0,         // should be ignored
+      customerEmail: 'hack', // should be ignored
+    })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(200)
+    const updateArg = mockBooking.findByIdAndUpdate.mock.calls[0]?.[1]
+    expect(updateArg).toHaveProperty('notes', 'ok')
+    expect(updateArg).not.toHaveProperty('totalPaid')
+    expect(updateArg).not.toHaveProperty('customerEmail')
+  })
+
+  it('prevents transition from refunded to any state', async () => {
+    mockBooking.findById.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: 'b1', status: 'refunded' }),
+    })
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ status: 'confirmed' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/cannot transition/i)
+  })
+
+  it('returns 404 when cancelling non-existent booking', async () => {
+    mockBooking.findById.mockResolvedValue(null)
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ action: 'cancel' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'nonexistent' }) })
+
+    expect(res.status).toBe(404)
+  })
+
+  it('returns 500 when Stripe refund fails', async () => {
+    mockBooking.findById.mockResolvedValue({
+      _id: 'b1',
+      stripePaymentId: 'pi_fail',
+      status: 'confirmed',
+    })
+    mockRefundsCreate.mockRejectedValue(new Error('Card declined'))
+
+    const { PATCH } = await import('@/app/api/admin/bookings/[id]/route')
+    const req = makeRequest({ action: 'cancel' })
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'b1' }) })
+
+    expect(res.status).toBe(500)
+    const data = await res.json()
+    expect(data.error).toMatch(/refund/i)
   })
 })
