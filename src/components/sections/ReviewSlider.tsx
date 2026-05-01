@@ -256,9 +256,11 @@ export function ReviewSlider({
   useEffect(() => {
     function handleResize() {
       const w = window.innerWidth
-      if (w < 640) setCardsPerPage(1)
-      else if (w < 1024) setCardsPerPage(2)
-      else setCardsPerPage(3)
+      const nextCardsPerPage = w < 640 ? 1 : w < 1024 ? 2 : 3
+      setCardsPerPage((current) =>
+        current === nextCardsPerPage ? current : nextCardsPerPage
+      )
+      setPage(0)
     }
     handleResize()
     window.addEventListener('resize', handleResize)
@@ -266,11 +268,6 @@ export function ReviewSlider({
   }, [])
 
   const totalPages = Math.ceil(filteredReviews.length / cardsPerPage)
-
-  // Reset page when tab or cardsPerPage changes
-  useEffect(() => {
-    setPage(0)
-  }, [cardsPerPage, activeTab])
 
   const prev = useCallback(() => {
     setPage((p) => (p > 0 ? p - 1 : totalPages - 1))
@@ -307,7 +304,10 @@ export function ReviewSlider({
           googleCount={googleCount}
           tripadvisorCount={tripadvisorCount}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab)
+            setPage(0)
+          }}
         />
       </div>
 

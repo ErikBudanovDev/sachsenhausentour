@@ -12,20 +12,38 @@ interface AdminUser {
   createdAt: string
 }
 
+async function getUsers() {
+  const res = await fetch('/api/admin/users')
+  const data = await res.json()
+  return data.users as AdminUser[]
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
 
   async function fetchUsers() {
-    const res = await fetch('/api/admin/users')
-    const data = await res.json()
-    setUsers(data.users)
+    const nextUsers = await getUsers()
+    setUsers(nextUsers)
     setLoading(false)
   }
 
   useEffect(() => {
-    fetchUsers()
+    let cancelled = false
+
+    async function loadUsers() {
+      const nextUsers = await getUsers()
+      if (cancelled) return
+      setUsers(nextUsers)
+      setLoading(false)
+    }
+
+    void loadUsers()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   async function toggleActive(id: string, active: boolean) {

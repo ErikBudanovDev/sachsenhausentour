@@ -35,6 +35,15 @@ interface Pagination {
   totalPages: number
 }
 
+async function getBookingsPage(page: number, search: string, statusFilter: string) {
+  const params = new URLSearchParams({ page: String(page), limit: '20' })
+  if (search) params.set('search', search)
+  if (statusFilter) params.set('status', statusFilter)
+
+  const res = await fetch(`/api/admin/bookings?${params}`)
+  return res.json() as Promise<{ bookings: Booking[]; pagination: Pagination }>
+}
+
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [pagination, setPagination] = useState<Pagination>({
@@ -49,22 +58,34 @@ export default function BookingsPage() {
   const fetchBookings = useCallback(
     async (page = 1) => {
       setLoading(true)
-      const params = new URLSearchParams({ page: String(page), limit: '20' })
-      if (search) params.set('search', search)
-      if (statusFilter) params.set('status', statusFilter)
-
-      const res = await fetch(`/api/admin/bookings?${params}`)
-      const data = await res.json()
-      setBookings(data.bookings)
-      setPagination(data.pagination)
-      setLoading(false)
+      try {
+        const data = await getBookingsPage(page, search, statusFilter)
+        setBookings(data.bookings)
+        setPagination(data.pagination)
+      } finally {
+        setLoading(false)
+      }
     },
     [search, statusFilter]
   )
 
   useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+    let cancelled = false
+
+    async function loadInitialBookings() {
+      const data = await getBookingsPage(1, search, statusFilter)
+      if (cancelled) return
+      setBookings(data.bookings)
+      setPagination(data.pagination)
+      setLoading(false)
+    }
+
+    void loadInitialBookings()
+
+    return () => {
+      cancelled = true
+    }
+  }, [search, statusFilter])
 
   async function handleCancel(id: string) {
     if (!confirm('Cancel this booking and issue a full refund via Stripe?')) return
