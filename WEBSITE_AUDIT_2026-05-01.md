@@ -1,445 +1,299 @@
 # Website Audit
 
 Date: 2026-05-01
+Last Revalidated: 2026-05-01 (pricing & caching update)
 Project: `bot` / `sachsenhausentour.de`
-Scope: source review of the Next.js application, booking flow, admin flow, configuration surface, and local build/test/lint health
+Scope: unresolved security, architecture, redundancy, and inconsistency issues only
 
-## Executive Summary
+This version intentionally tracks open issues only. Resolved findings were removed from the detailed register so the document can be used as a live backlog rather than a historical changelog.
 
-The codebase is functional enough to show the public site and expose a booking/admin workflow, but it currently has several high-risk trust and consistency problems.
+## Current Validation State
 
-The most important issues are:
+- `npm test`: passed (`73/73`)
+- `npm run build`: passed
+- `npm run lint`: passed with `9` warnings, `0` errors
+- `npm audit --json`: `2` moderate vulnerabilities, both in the `next -> postcss` chain (`GHSA-qx2v-qp2m-jg93`)
 
-1. The public `POST /api/checkout/confirm` endpoint trusts client input, does not verify payment status with Stripe, can create "confirmed" bookings, and can send arbitrary confirmation emails.
-2. Capacity checks are not enforced atomically, so the site can oversell the same slot under concurrency.
-3. There is a hardcoded default admin password in `scripts/seed-admin.ts`.
-4. Booking mutations are too permissive: any authenticated user can update booking status and trigger refunds, and updates are not validated.
-5. Date, blackout, pricing, and config values are duplicated in incompatible formats across the UI, API routes, content files, and seed/fallback logic.
-
-This is not just a security problem. It is also an architecture problem: the app has no single source of truth for booking configuration, pricing, or booking finalization.
-
-## Methodology
-
-I reviewed:
-
-- App Router routes in `src/app/`
-- server-side logic in `src/app/api/`
-- auth, MongoDB, Stripe, and config code in `src/lib/`
-- data models in `src/models/`
-- booking/admin UI flows in `src/components/`
-- content/config files in `src/content/` and `src/config/`
-- helper scripts in `scripts/`
-- local project documentation in `README.md`, `CLAUDE.md`, and local Next docs under `node_modules/next/dist/docs/`
-
-I also ran:
-
-- `npm run lint`
-- `npm test`
-- `npm run build`
-- `npm ls lightningcss @rolldown/binding-darwin-arm64 --all`
-
-I did not run a live dependency vulnerability scan against the network, and I did not inspect actual secret values from `.env.local`.
-
-## Current Architecture
-
-At a high level the app is:
-
-- public marketing site: App Router pages under `src/app/(site)/`
-- booking flow: `BookingWidget` -> `POST /api/checkout` -> Stripe PaymentIntent -> client-side `POST /api/checkout/confirm` -> optional Stripe webhook backfill
-- admin flow: `next-auth` credentials login -> `/admin/*` pages -> `/api/admin/*` CRUD routes
-- persistence: MongoDB via Mongoose
-- payments: Stripe
-- transactional email: Nodemailer/SMTP
-
-### Intended layering
-
-`CLAUDE.md` describes a 3-layer structure:
-
-- components = reusable/pure view layer
-- content = all copy and structured data
-- pages = thin assembly only
-
-The implementation no longer matches that design:
-
-- `src/app/(site)/page.tsx` is 551 lines
-- `src/app/(site)/about/page.tsx` is 303 lines
-- `src/app/(site)/es/page.tsx` is 295 lines
-- pages contain large amounts of hardcoded structure and copy
-- many section components and content types exist but are not actually used
-
-This mismatch matters because it is one of the reasons pricing, meeting-point, SEO, and booking details now drift across the application.
-
-## Severity Summary
+## Open Issue Summary
 
 ### Critical
 
-- public booking-confirm endpoint can create confirmed bookings and send emails without payment verification
+- No currently confirmed critical findings
 
 ### High
 
-- overselling/race conditions in slot capacity handling
-- hardcoded admin seed credentials in repository
-- booking update/refund endpoint is overly permissive
-- blackout/date format mismatch breaks booking enforcement
-- pricing/config duplication creates contradictory runtime behavior
+- slot capacity can still be oversold under concurrency
+- server-side mutation validation is still too weak on several admin and booking write paths
+- business configuration is still duplicated across DB-backed config, content, static config, scripts, and SEO output
 
 ### Medium
 
-- multiple active tour configs can exist with arbitrary selection
-- admin create/update routes bypass validation
-- no visible rate limiting on admin login or public booking endpoints
-- security headers are not configured
-- build/test toolchain is broken locally due invalid/missing native optional deps
-- deprecated `middleware` convention on Next 16
-- blog routing/draft handling is inconsistent
+- booking finalization is still split across multiple write paths, and a replayed valid `paymentId` can still resend emails
+- RBAC is inconsistent across `/admin` pages and `/api/admin/*` read routes
+- date normalization is incomplete across booking, stats, admin UI, and content
+- active `TourConfig` reads are still loosely defined
+- there is no visible rate limiting or brute-force protection on login and public booking endpoints
+- security headers are present, but the current CSP is still permissive
+- post-login redirect handling is still unsanitized
+- the public confirmation page is still not authoritative
+- blog routing and draft handling are inconsistent
 - structured data is duplicated and contradictory
+- locale support and legal routes are incomplete
+- the project still carries an open dependency advisory in `next` / `postcss`
+- the app still relies on legacy `src/middleware.ts`
 
 ### Low
 
-- broken legal links and incomplete locale implementation
-- dead code, unused dependencies, and redundant config objects
-- public confirmation page trusts query params and can show fake success states
+- architecture drift and dead or half-adopted section/content systems still increase maintenance cost and redundancy
+- unused imports, props, and stale lint directives remain
 
-## Detailed Findings
+## Open Findings
 
-### 1. `POST /api/checkout/confirm` trusts the browser instead of Stripe
-
-Files:
-
-- `src/app/api/checkout/confirm/route.ts:125-186`
-- `src/components/booking/CheckoutForm.tsx:66-96`
-
-Why this is serious:
-
-- The endpoint is public.
-- It accepts `name`, `email`, `phone`, `date`, `time`, `guests`, `total`, and `paymentId` from the browser.
-- It does not verify the `paymentId` against Stripe.
-- It does not confirm that the payment intent belongs to the submitted customer/date/time/amount.
-- It saves a booking with `status: 'confirmed'`.
-- It sends a customer confirmation email and an internal notification email.
-
-Practical impact:
-
-- Anyone can call this endpoint directly and create fake confirmed bookings.
-- Anyone can cause the system to email arbitrary recipients with a forged "booking confirmed" message.
-- The database can be polluted with fake or malformed bookings before the webhook ever runs.
-
-Additional problems inside the same route:
-
-- `paymentId` is not part of the required-field validation in `src/app/api/checkout/confirm/route.ts:130-134`.
-- the HTML email template interpolates unescaped user-controlled values in `buildCustomerEmail()` at `src/app/api/checkout/confirm/route.ts:16-97`
-- it hardcodes `currency: 'eur'` in `src/app/api/checkout/confirm/route.ts:155`
-- it derives money from a user-supplied `total` string in `src/app/api/checkout/confirm/route.ts:140`
-
-Recommended fix:
-
-- Make Stripe webhooks the only source of truth for booking creation/finalization.
-- If the client still calls a post-payment endpoint, use it only for UX follow-up, never for persistence.
-- Verify the payment intent server-side with Stripe and match amount, currency, metadata, and status before doing anything else.
-- Escape or sanitize interpolated HTML email fields.
-
-### 2. Slot capacity can be oversold under concurrency
+### 1. Slot capacity can still be oversold under concurrency
 
 Files:
 
 - `src/app/api/checkout/route.ts:63-87`
-- `src/app/api/webhook/route.ts:32-77`
-- `src/app/api/checkout/confirm/route.ts:137-160`
 
-What happens now:
+Current behavior:
 
-- `POST /api/checkout` calculates remaining capacity by aggregating existing confirmed bookings.
-- If capacity exists, it creates a Stripe PaymentIntent.
-- Final booking creation happens later, either in the public confirm route or the webhook.
+- checkout checks remaining capacity by aggregating existing confirmed bookings
+- if capacity is available, it creates a Stripe PaymentIntent
+- no reservation is held and no atomic inventory update happens at payment-finalization time
 
-Why this fails:
+Risk:
 
-- Two customers can pass the capacity check at the same time.
-- Both can pay successfully.
-- There is no reservation hold, no transactional decrement, and no second authoritative capacity check at finalization time.
+- two customers can pass the capacity check at the same time
+- both can pay successfully
+- the same slot can be sold beyond `maxGuestsPerSlot`
 
-Practical impact:
-
-- same slot can be sold beyond `maxGuestsPerSlot`
-- refunds and manual customer support cleanup become the only correction path
-
-Recommended fix:
+Recommendation:
 
 - introduce a reservation model with expiry, or
-- perform authoritative capacity enforcement in a transaction at booking-finalization time, or
-- move to a slot-inventory document that can be atomically updated
+- move to an atomic slot-inventory document, or
+- enforce capacity again during final booking creation inside a transaction
 
-### 3. Hardcoded admin credentials exist in the repository
-
-File:
-
-- `scripts/seed-admin.ts:31-46`
-
-Why this is serious:
-
-- The script seeds `admin@sachsenhausentour.de`
-- The password is hardcoded as `Admin2025!`
-- The script logs the credentials back to the console
-
-Practical impact:
-
-- Anyone with repo access knows the default admin credential pattern.
-- If this script has ever been run unchanged in a real environment, the admin account is predictable.
-- This is especially dangerous because the application uses credential-based auth.
-
-Recommended fix:
-
-- remove hardcoded credentials immediately
-- require admin email/password from environment variables or interactive secure input
-- rotate any real password that may have been created from this script
-
-### 4. Booking mutation/refund permissions are too broad
-
-File:
-
-- `src/app/api/admin/bookings/[id]/route.ts:37-77`
-
-Problems:
-
-- only `session?.user` is required
-- admin role is not required
-- any authenticated user can:
-  - edit `notes`
-  - edit `assignedGuide`
-  - edit `status`
-  - call `action: 'cancel'` and trigger a Stripe refund
-
-There is also a data-integrity bypass:
-
-- `status` is accepted from request body in `src/app/api/admin/bookings/[id]/route.ts:46-50`
-- a caller can mark a booking `refunded` or `cancelled` without the Stripe refund branch ever running
-
-Recommended fix:
-
-- separate `staff` and `admin` permissions explicitly
-- allow only admin refunds/cancellations unless business rules require otherwise
-- disallow direct status mutation from the API and force status changes through explicit actions
-- validate allowed transitions on the server
-
-### 5. Blackout-date and booking-date formats are inconsistent across the stack
+### 2. Booking finalization is still split across multiple write paths
 
 Files:
 
-- `src/components/booking/BookingCalendar.tsx:9-23`
-- `src/components/booking/BookingCalendar.tsx:85-88`
-- `src/components/booking/BookingWidget.tsx:76-83`
-- `src/components/booking/BookingWidget.tsx:123-130`
-- `src/app/api/checkout/route.ts:35-50`
-- `src/models/TourConfig.ts:14-15`
-- `src/app/admin/(dashboard)/tours/page.tsx:257-269`
+- `src/app/api/checkout/confirm/route.ts:135-230`
+- `src/app/api/webhook/route.ts:13-77`
+- `scripts/backfill-bookings.ts:23-69`
+
+Current behavior:
+
+- the public confirm route verifies Stripe, then upserts a booking and sends email
+- the Stripe webhook also creates or updates bookings
+- the backfill script contains a third booking-creation path
+
+Open risk:
+
+- business rules are duplicated across three separate implementations
+- a replayed valid `paymentId` can still trigger customer and internal email again in the confirm route
+- booking finalization is still not webhook-authoritative
+
+Recommendation:
+
+- make the webhook the only authoritative booking-finalization path
+- use the client-facing confirm route only for UX follow-up if needed
+- record email-sent state so a valid `paymentId` cannot resend confirmation indefinitely
+
+### 3. Server-side mutation validation is still too weak
+
+Files:
+
+- `src/app/api/admin/tours/route.ts:19-28`
+- `src/app/api/admin/tours/[id]/route.ts:27-45`
+- `src/app/api/admin/users/[id]/route.ts:7-35`
+- `src/app/api/admin/bookings/[id]/route.ts:33-109`
+- `src/app/api/checkout/confirm/route.ts:182-203`
+
+Current behavior:
+
+- several routes still accept raw request bodies or raw update objects
+- `findByIdAndUpdate()` / `findOneAndUpdate()` calls still omit `runValidators: true`
+- there is no route-boundary schema layer such as Zod or Valibot
+
+Risk:
+
+- malformed blackout dates, bad roles, invalid slot payloads, or broken pricing data can still enter the database
+- Mongoose schema guarantees are weaker on updates than they appear from the model definitions
+
+Recommendation:
+
+- validate every route body before touching Mongoose
+- use explicit field whitelists everywhere
+- add `runValidators: true` on update paths
+
+### 4. RBAC is still inconsistent across `/admin` surfaces
+
+Files:
+
+- `src/middleware.ts:21-35`
+- `src/app/admin/(dashboard)/layout.tsx:9-19`
+- `src/components/admin/AdminSidebar.tsx:17-22`
+- `src/app/api/admin/bookings/route.ts:6-45`
+- `src/app/api/admin/bookings/[id]/route.ts:17-45`
+- `src/app/api/admin/stats/route.ts:7-54`
+- `src/app/api/admin/tours/route.ts:7-28`
+- `src/app/api/admin/tours/[id]/route.ts:7-45`
+- `src/app/api/admin/users/route.ts:7-67`
+
+Current behavior:
+
+- middleware only checks that a token exists for `/admin/*` and `/api/admin/*`
+- the admin dashboard layout does not perform a server-side role gate
+- some routes are admin-only, but several admin read endpoints accept any authenticated user
+- the sidebar always exposes Bookings, Tours, and Users navigation
+
+Risk:
+
+- permissions are hard to reason about
+- customer booking data is still broader than a strict least-privilege model would suggest
+- the UI can lead users into mixed 200/403 behavior depending on the page and route
+
+Recommendation:
+
+- define a clear capability matrix for `admin` vs `staff`
+- enforce it at both the edge layer and route layer
+- hide navigation a role cannot use
+
+### 5. Date handling is still inconsistent
+
+Files:
+
+- `src/components/booking/BookingWidget.tsx:79-86`
 - `src/app/api/admin/stats/route.ts:15-32`
+- `src/app/admin/(dashboard)/tours/page.tsx:263-276`
 
-Observed formats:
+Current behavior:
 
-- calendar component expects blackout dates as ISO `YYYY-MM-DD`
-- `TourConfig` comments also say blackout dates are ISO
-- booking widget sends selected booking date as `en-GB` `DD/MM/YYYY`
-- checkout route compares `config.blackoutDates.includes(date)` using that `DD/MM/YYYY` value
-- admin tours page instructs users to enter blackout dates as `DD/MM/YYYY`
-- dashboard stats also use `en-GB` string dates for "today"
+- the booking widget now submits ISO dates
+- dashboard stats still compute `today` using `toLocaleDateString('en-GB')`
+- the tours admin UI still instructs operators to enter blackout dates as `DD/MM/YYYY`
 
-Why this matters:
+Risk:
 
-- if blackout dates are stored as ISO, the client calendar blocks them but the server-side checkout route does not
-- if blackout dates are stored as `DD/MM/YYYY`, the checkout route may block them but the calendar component will not
-- reporting becomes locale/timezone sensitive because `tourDate` is stored as display text, not normalized data
+- bookings, blackout enforcement, and reporting are no longer speaking one consistent date format
+- "today's bookings" can miscount when stored booking dates are ISO
 
-This is one of the most important consistency bugs in the app.
+Recommendation:
 
-Recommended fix:
+- normalize all persisted booking and blackout dates to ISO
+- remove `DD/MM/YYYY` guidance from admin UI
+- compute reporting dates using the same canonical format the booking system stores
 
-- store all dates in ISO format only
-- use a typed server-side date object or ISO date string for all booking records
-- format for display only at the UI edge
-
-### 6. Pricing and tour config are duplicated with contradictory values
+### 6. Business configuration is partially centralized but still has residual duplication
 
 Files:
 
-- `src/lib/tour-config.ts:18-31`
-- `src/config/site.ts:15-22`
-- `src/content/en/book.ts:74-81`
-- `src/content/en/book.ts:154-161`
-- `src/app/(site)/book/page.tsx:45-58`
-- `scripts/seed-admin.ts:56-71`
-- `src/__tests__/booking-pipeline.test.ts:43-58`
+- `src/lib/tour-config.ts:31-52` (canonical fallback config)
+- `src/config/site.ts:1-23` (static site metadata — no longer carries price)
+- `src/app/admin/(dashboard)/tours/page.tsx` (admin UI now edits pricing tiers, original price, discount badge)
+- `scripts/seed-admin.ts:54-80`
+- `src/components/sections/BookingSidebar.tsx:95-105` (now receives pricing via props, but still has prop defaults)
+- `src/components/sections/VisitorInfo.tsx:19-26` (now receives pricing via props, but still has prop defaults)
+- `src/components/seo/TourSchema.tsx:10-54` (now receives price via props)
+- `src/app/api/checkout/confirm/route.ts:47-103`
 
-Contradictions found:
+Progress since last review:
 
-- fallback config price: `5900` cents (`src/lib/tour-config.ts`)
-- seeded default tour price: `2900` cents (`scripts/seed-admin.ts`)
-- marketing copy repeatedly says `€29`
-- booking page converts dynamic DB price to euros, but many other pages are hardcoded
-- fallback config has one time slot; static content ships two time slots
+- all page-level prices (homepage, tour, book, Spanish page, blog posts) now read from `getActiveTourConfig()` at render time
+- `BookingSidebar`, `VisitorInfo`, `MobileBookingBar`, `TourSchema`, and `OrganizationSchema` all receive pricing via server-component props
+- hardcoded `€29` removed from `site.ts` description, content files, and FAQ answers
+- admin UI now has full pricing tier management (label, price, note, highlight) plus original price and discount badge fields
+- all pages with DB reads marked `force-dynamic` to prevent stale static caching
 
-Practical impact:
+Remaining risk:
 
-- if the DB is down, the site can silently fall back to a different price and slot structure
-- marketing pages, checkout, emails, structured data, and admin can all disagree
+- components still carry prop defaults (e.g. `pricePerPerson = 2900`) that could diverge from DB if a parent stops passing props
+- `FALLBACK_CONFIG` in `tour-config.ts` is a second source of truth that only activates when DB is unreachable
+- meeting point, duration, departure time, and transport assumptions still exist in multiple places outside pricing
+- seed script still has its own defaults that may drift from `FALLBACK_CONFIG`
 
-Recommended fix:
+Recommendation:
 
-- define one authoritative tour-config source
-- remove price/meeting-point/duration duplication from content/config unless it is explicitly derived
-- add a config drift test that fails if static copy and active config disagree
+- remove prop defaults from components — require explicit props or fail visibly
+- keep `FALLBACK_CONFIG` but add a monitoring alert when it is used
+- centralize non-pricing business data (meeting point, duration, transport) the same way pricing was centralized
 
-### 7. Multiple active tour configs can exist, and the app chooses one arbitrarily
-
-Files:
-
-- `src/models/TourConfig.ts:40-45`
-- `src/lib/tour-config.ts:40-43`
-- `src/app/api/checkout/route.ts:24-33`
-- `src/app/api/admin/tours/route.ts:18-28`
-
-Problem:
-
-- the schema allows many documents with `active: true`
-- both public config loading and checkout use `findOne({ active: true })`
-- admin create route can create more configs without enforcing uniqueness
-
-Practical impact:
-
-- price, slots, blackout dates, and meeting point become non-deterministic if more than one active document exists
-
-Recommended fix:
-
-- enforce one active config with a unique partial index or by using a singleton document
-
-### 8. Admin create/update routes bypass strong validation
+### 7. Active `TourConfig` selection is still loosely defined
 
 Files:
 
-- `src/app/api/admin/tours/route.ts:25-28`
-- `src/app/api/admin/tours/[id]/route.ts:36-45`
-- `src/app/api/admin/users/[id]/route.ts:20-29`
-- `src/app/api/admin/bookings/[id]/route.ts:46-50`
-- `src/app/api/checkout/confirm/route.ts:142-160`
+- `src/lib/tour-config.ts:59-64`
+- `src/app/api/checkout/route.ts:24-27`
+- `src/models/TourConfig.ts:74-94`
 
-Problems:
+Current behavior:
 
-- `TourConfig.create(body)` accepts raw request bodies
-- `findByIdAndUpdate(id, body, { new: true })` is used without `runValidators: true`
-- user patch route is whitelisted, but still updates without validators
-- booking patch route updates status-like fields without transition validation
-- booking upsert in checkout confirm uses `findOneAndUpdate(..., { upsert: true })` without validators
+- model hooks now try to deactivate other active configs on both `save` and `findOneAndUpdate`
+- runtime reads still use `findOne({ active: true })`
+- pages now use `force-dynamic` so every request gets a fresh DB read
 
-Practical impact:
+Risk:
 
-- malformed data can be stored
-- enum constraints can be bypassed on updates
-- negative/invalid prices, bad time slots, invalid roles, or malformed blackout lists can slip into production
+- application behavior still depends on "whichever active row is returned first" if data drift or race conditions create multiple active configs
+- the singleton enforcement via hooks can be bypassed by direct MongoDB operations outside Mongoose
 
-Recommended fix:
+Recommendation:
 
-- validate input with a schema layer such as Zod or Valibot before Mongoose
-- enable `runValidators: true` on updates
-- whitelist fields on every mutation route
+- enforce a stronger singleton strategy
+- consider a unique partial index or a dedicated singleton document
 
-### 9. No visible brute-force or abuse controls on auth and public endpoints
+### 8. No visible brute-force or abuse controls exist on auth and public booking endpoints
 
 Files:
 
 - `src/lib/auth.ts:28-79`
 - `src/app/admin/login/page.tsx:18-35`
-- `src/middleware.ts:5-37`
-- `src/app/api/checkout/route.ts`
-- `src/app/api/checkout/confirm/route.ts`
+- `src/app/api/checkout/route.ts:12-117`
+- `src/app/api/checkout/confirm/route.ts:135-230`
 
-Observed:
+Current behavior:
 
-- credential auth has no rate limit or lockout logic
-- public booking endpoints have no rate limit
-- email-sending endpoint is public
+- no visible login throttling
+- no visible route rate limiting
+- the confirm route is public and still sends email
 
-Practical impact:
+Risk:
 
-- admin login can be brute-forced
-- checkout/confirm can be spammed
-- SMTP can be abused through the confirmation route
+- admin credentials can be brute-forced
+- checkout and confirm routes can be spammed
+- SMTP side effects can be abused
 
-Recommended fix:
+Recommendation:
 
-- add rate limiting by IP and route
-- add login throttling and optionally captcha after repeated failures
-- move email sending behind verified payment state only
+- add IP-based and route-based throttling
+- add login cooldowns or captcha after repeated failures
+- remove email side effects from public client-triggered paths
 
-### 10. Security headers are not configured
+### 9. Security headers exist, but the CSP is still too permissive
 
 File:
 
-- `next.config.ts:1-7`
+- `next.config.ts:3-45`
 
-Observed:
+Current behavior:
 
-- `next.config.ts` is effectively empty
-- no CSP
-- no HSTS
-- no `X-Frame-Options` / `frame-ancestors`
-- no `Referrer-Policy`
-- no `Permissions-Policy`
+- baseline headers are now configured
+- the CSP still includes:
+  - `script-src 'unsafe-inline' 'unsafe-eval'`
+  - `img-src https: http:`
 
-This is not the root cause of the booking issues above, but it is a missing baseline hardening layer.
+Risk:
 
-Recommended fix:
+- hardening is better than before, but still looser than it should be for a production booking flow
 
-- configure headers centrally in Next config/proxy
-- set a CSP that explicitly allows Stripe, images, fonts, and required media origins
+Recommendation:
 
-### 11. Tooling/install health is broken locally
+- tighten CSP for production
+- remove `unsafe-eval` if not required
+- remove `http:` from `img-src`
+- add an explicit `frame-ancestors` policy in CSP
 
-Command results:
-
-- `npm run lint` failed with 3 errors and 9 warnings
-- `npm test` failed before tests ran because `@rolldown/binding-darwin-arm64` is missing/invalid
-- `npm run build` failed because `lightningcss.darwin-arm64.node` is missing
-- build also emitted a Next 16 deprecation warning for `middleware`
-- `npm ls lightningcss @rolldown/binding-darwin-arm64 --all` reported `@rolldown/binding-darwin-arm64` as invalid
-
-Why this matters:
-
-- the repo is not in a reliable build/test state
-- real regressions may be masked by environment/package issues
-
-Relevant code references:
-
-- `src/components/sections/ReviewSlider.tsx:270-273`
-- `src/app/admin/(dashboard)/bookings/page.tsx:65-67`
-- `src/app/admin/(dashboard)/users/page.tsx:27-29`
-
-Lint-specific problems:
-
-- `react-hooks/set-state-in-effect` errors in `ReviewSlider`, admin bookings page, and admin users page
-- several unused imports/props indicate dead or drifting code
-
-Recommended fix:
-
-- repair the local dependency install
-- re-run lint/build/test in CI
-- treat the current build failure as a release blocker
-
-### 12. The project is still using deprecated `middleware` on Next 16
-
-Files:
-
-- `src/middleware.ts:1-42`
-- local build output from `npm run build`
-
-Why it matters:
-
-- Next 16 warned: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
-- auth enforcement is therefore sitting on a framework-debt path
-
-Recommended fix:
-
-- migrate to the current `proxy` convention and re-check auth integration against Next 16 docs
-
-### 13. Post-login redirect handling is not sanitized
+### 10. Post-login redirect handling is still not sanitized
 
 Files:
 
@@ -447,148 +301,161 @@ Files:
 - `src/app/admin/login/page.tsx:10-11`
 - `src/app/admin/login/page.tsx:33`
 
-Problem:
+Current behavior:
 
-- login page reads `callbackUrl` from query params and pushes to it directly after login
+- the login page reads `callbackUrl` from query params and pushes to it directly
 
 Risk:
 
-- possible open redirect or at least broken post-login navigation if an attacker injects an external or malformed `callbackUrl`
+- malformed or attacker-controlled callback values can still produce broken or unsafe post-login navigation
 
-Recommended fix:
+Recommendation:
 
 - only allow same-origin internal paths
 - reject absolute URLs and dangerous schemes
 
-### 14. Blog routing and draft handling are inconsistent
+### 11. The public confirmation page is still not authoritative
+
+Files:
+
+- `src/app/(site)/book/confirmation/page.tsx:9-16`
+- `src/app/(site)/book/confirmation/page.tsx:25-72`
+- `src/components/booking/CheckoutForm.tsx:87-95`
+
+Current behavior:
+
+- the confirmation page renders booking details from query parameters
+- it does not fetch a verified booking record
+
+Risk:
+
+- anyone can construct a convincing fake success URL
+- users can see success even if booking persistence or email delivery failed
+
+Recommendation:
+
+- replace query-param rendering with a server-validated booking reference page
+
+### 12. Blog routing and draft handling are still inconsistent
 
 Files:
 
 - `src/app/(site)/blog/page.tsx:17-45`
 - `src/app/(site)/blog/[slug]/page.tsx:7-15`
-- `src/app/sitemap.ts:38-51`
 
-Problems:
+Current behavior:
 
-- blog index marks some posts as `draft: true`
-- those drafts still exist as real pages under static routes
-- dynamic `[slug]` page returns a generic 200 page for any arbitrary slug instead of a 404
-- sitemap excludes drafts, but routes still resolve
+- the blog index marks some posts as draft
+- those posts still exist as real routed pages
+- the dynamic `[slug]` page returns a generic 200 placeholder for arbitrary slugs instead of `notFound()`
 
-Practical impact:
+Risk:
 
-- inconsistent SEO surface
-- arbitrary low-quality pages can be indexed if linked
-- "draft" is only a listing concern, not a routing concern
+- low-quality or placeholder pages can be indexed
+- draft status is only a listing concept, not a routing rule
 
-Recommended fix:
+Recommendation:
 
-- use a real content registry
-- return `notFound()` for unknown slugs
-- gate draft pages consistently
+- use one content registry
+- route only known published slugs
+- return `notFound()` for unknown or draft slugs
 
-### 15. Structured data is duplicated and contradictory
+### 13. Structured data is still duplicated and contradictory
 
 Files:
 
-- `src/components/seo/OrganizationSchema.tsx:3-47`
-- `src/app/(site)/about/page.tsx:43-87`
-- `src/app/(site)/layout.tsx:13-17`
-- `src/app/(site)/about/page.tsx:300`
+- `src/components/seo/OrganizationSchema.tsx:11-48`
+- `src/app/(site)/layout.tsx:12-20`
+- `src/app/(site)/about/page.tsx:43-92`
 
-Observed:
+Current behavior:
 
-- the shared site layout already injects one `OrganizationSchema`
-- the about page defines and injects a second, different `OrganizationSchema`
+- the shared site layout injects one organization schema
+- the about page injects a second, different organization schema
+- review counts and schema details still disagree
 
-Differences include:
+Risk:
 
-- different schema type
-- different logo reference
-- different `aggregateRating` values
-- different review counts
+- search engines receive contradictory organization data
 
-Practical impact:
+Recommendation:
 
-- search engines receive contradictory structured data for the same organization
+- keep one authoritative organization schema generator
+- extend it where needed instead of duplicating it per page
 
-Recommended fix:
-
-- keep one authoritative organization schema component
-- if the about page needs more data, extend the shared schema rather than duplicating it
-
-### 16. Legal links and locale support are incomplete
+### 14. Locale support and legal routes are still incomplete
 
 Files:
 
-- `src/config/navigation.ts:23-26`
 - `src/config/site.ts:7-8`
 - `src/app/(site)/es/page.tsx`
+- `src/config/navigation.ts`
 
-Observed:
+Current behavior:
 
-- footer links point to `/imprint` and `/privacy`
-- there are no corresponding routes under `src/app/`
-- `siteConfig.locales` claims `['en', 'de', 'es']`
-- there is no `/de` route and no `src/content/de/`
-- `next-intl` is installed but unused
+- config still advertises `en`, `de`, and `es`
+- there is no `/de` route
+- the app still only has one custom Spanish page rather than a coherent i18n structure
+- legal navigation still points to incomplete or missing routes
 
-Practical impact:
+Risk:
 
-- broken legal navigation
-- partial/incomplete localization story
-- unnecessary dependency weight and architecture confusion
+- broken or misleading navigation
+- incomplete internationalization surface
+- confusing architecture because config promises more than the app implements
 
-### 17. Confirmation page is not authoritative
+Recommendation:
 
-File:
+- either implement the supported locales and legal routes fully, or remove them from config and navigation
 
-- `src/app/(site)/book/confirmation/page.tsx:9-16`
-- `src/app/(site)/book/confirmation/page.tsx:25-29`
-- `src/app/(site)/book/confirmation/page.tsx:69-72`
+### 15. Dependency advisories remain open
 
-Problem:
+Evidence:
 
-- the page renders booking success details directly from query params
-- it does not fetch a verified booking record
+- `npm audit --json`
 
-Practical impact:
+Current state:
 
-- anyone can open a fake success URL and see a convincing confirmation screen
-- if `/api/checkout/confirm` fails or the DB write fails, the user can still see success
+- `2` moderate vulnerabilities are still reported
+- affected chain: `next -> postcss`
+- advisory: `GHSA-qx2v-qp2m-jg93`
 
-Recommended fix:
+Risk:
 
-- redirect to a server-validated booking reference page keyed by a trusted token or booking id
+- dependency security posture is not fully clean even though app-level tests and builds pass
 
-### 18. Internal navigation and config are duplicated in several low-signal ways
+Recommendation:
 
-Files:
+- review the advisory against the actual deployment/runtime exposure
+- update dependencies once a safe and credible upgrade path is confirmed
 
-- `src/components/ui/Button.tsx:52-57`
-- `src/lib/stripe.ts:16-20`
-- `src/components/booking/StripeProvider.tsx:7-12`
-- `src/components/booking/BookingWidget.tsx:25-38`
-- `src/components/booking/BookingWidget.tsx:47`
-- `src/config/theme.ts:1-28`
-
-Examples:
-
-- `Button` renders internal links as raw `<a>` instead of Next `Link`
-- `getStripePublishableKey()` exists but the client does not use it
-- Stripe live/test mode is selected in two separate ways:
-  - server: `STRIPE_LIVE`
-  - client: `NEXT_PUBLIC_STRIPE_LIVE`
-- `checkoutUrl` is passed into `BookingWidget` but never used
-- `theme.ts` exists but theme values are separately defined in `globals.css`
-
-These are not the highest-risk issues, but they are strong evidence of config drift.
-
-### 19. Many reusable section components and content types appear to be dead or half-adopted
+### 16. The app still relies on legacy `src/middleware.ts`
 
 Files:
 
-- `src/components/sections/index.ts:1-12`
+- `src/middleware.ts:1-42`
+
+Current state:
+
+- the build passes, but the repo still uses the legacy middleware entrypoint rather than the current Next 16 direction
+
+Risk:
+
+- auth and routing control are sitting on framework debt
+- future upgrades are more likely to produce friction in exactly the request path that guards admin access
+
+Recommendation:
+
+- migrate the edge/auth gate to the current supported approach and revalidate behavior afterward
+
+### 17. Architecture drift and dead or half-adopted section/content systems still increase redundancy
+
+Files:
+
+- `src/app/(site)/page.tsx`
+- `src/app/(site)/about/page.tsx`
+- `src/app/(site)/es/page.tsx`
+- `src/components/sections/index.ts`
 - `src/components/sections/AboutCompany.tsx`
 - `src/components/sections/Comparison.tsx`
 - `src/components/sections/GuideVoice.tsx`
@@ -597,230 +464,91 @@ Files:
 - `src/components/sections/Testimonials.tsx`
 - `src/components/sections/WhyBook.tsx`
 - `src/components/sections/WhyVisit.tsx`
-- `src/content/types.ts:216-234`
-- `src/app/(site)/page.tsx:69-551`
+- `src/content/types.ts`
 
-Observed pattern:
+Current behavior:
 
-- the repo contains a sizeable reusable section system
-- the homepage and other pages still manually render much of the same structure inline
-- content types model many sections that are not actually driving the pages
+- large pages still inline a lot of structure and copy
+- the repo also contains a reusable section/content system that is only partially adopted
 
-Practical impact:
+Risk:
 
-- larger maintenance surface
-- harder refactors
-- repeated markup and copy drift
-- more places for pricing/SEO/UX details to fall out of sync
+- more redundancy
+- more copy drift
+- harder refactors and lower confidence when changing business details
 
-## Notable Inconsistencies
+Recommendation:
 
-These are separate from severity ranking because they affect trust and maintainability even when they are not immediate exploits.
+- either refactor pages to the documented component/content model, or simplify the repo by removing the half-adopted abstraction layer
 
-### Price inconsistency
+## Notable Open Inconsistencies
 
-- marketing copy repeatedly says `EUR29`
-- seed script creates `2900`
-- fallback/test config uses `5900`
+### Transport inclusion conflict
 
-### Time-slot inconsistency
+- `src/components/sections/VisitorInfo.tsx:115-117` says the guided tour price includes the round-trip S-Bahn journey
+- `src/content/en/home.ts:347-348` says a separate ABC ticket is required and is not included
+- `src/app/(site)/tour/page.tsx:81-83` also tells visitors to bring a valid transit ticket
 
-- static booking content ships two slots in `src/content/en/book.ts:171-185`
-- fallback config only has one slot in `src/lib/tour-config.ts:23-25`
+### Review-count conflict
 
-### Meeting-point inconsistency
+- homepage UI presents one review volume
+- shared organization schema presents another
+- the about-page schema presents a third
 
-- editable in DB config
-- duplicated in:
-  - `src/config/site.ts`
-  - `src/lib/tour-config.ts`
-  - `src/content/en/book.ts`
-  - `src/components/seo/TourSchema.tsx`
-  - `src/app/api/checkout/confirm/route.ts`
+### Locale conflict
 
-### Review-count inconsistency
+- config advertises `de`
+- the app does not implement `/de`
 
-- homepage displays `320+ reviews` in `src/app/(site)/page.tsx:106-121`
-- shared organization schema emits `4363` reviews in `src/components/seo/OrganizationSchema.tsx:32-38`
-- about-page schema emits `320` reviews in `src/app/(site)/about/page.tsx:64-71`
+### Source-of-truth conflict (partially resolved)
 
-### Locale inconsistency
-
-- config says `en`, `de`, `es`
-- implementation is effectively `en` plus one custom `es` page
-
-### Framework/docs inconsistency
-
-- repo docs still describe "Next.js 14+" in `CLAUDE.md:5`
-- actual app uses Next `16.2.3`
-- framework also warns the current `middleware` convention is deprecated
-
-## Security Posture Summary
-
-### Stronger points
-
-- passwords are hashed with bcrypt before storage in the admin create route
-- webhook signature verification exists in `src/app/api/webhook/route.ts:23-28`
-- session checks are present on admin routes
-- auth errors are reasonably generic on login
-
-### Weak points
-
-- booking finalization trusts the client
-- a repo script contains default admin credentials
-- no obvious request throttling
-- configuration drift undermines server-side enforcement
-- authorization boundaries are too coarse on booking operations
-
-## Architecture Assessment
-
-### What is working
-
-- simple and understandable App Router structure
-- clear separation between public pages and admin pages
-- Mongoose model layer is small and readable
-- Stripe/Mongo/email integrations are isolated to a small number of files
-
-### What is not working
-
-- configuration is split across DB, content files, static config, scripts, schemas, and templates
-- booking creation is implemented in three places:
-  - public confirm route
-  - webhook route
-  - backfill script
-- pages are much fatter than the documented architecture intends
-- admin pages are largely client-only dashboards with mount-time fetching, which increases JS and weakens App Router advantages
-
-## Redundancy Inventory
-
-### Business constants duplicated
-
-- price
-- duration
-- meeting point
-- departure time
-- review counts
-- logo/schema details
-
-### Booking persistence duplicated
-
-- `src/app/api/checkout/confirm/route.ts`
-- `src/app/api/webhook/route.ts`
-- `scripts/backfill-bookings.ts`
-
-### Auth checks duplicated
-
-- middleware-level token checks
-- per-route `auth()` checks
-- repeated role logic in route handlers
-
-### Stripe mode selection duplicated
-
-- `src/lib/stripe.ts`
-- `src/components/booking/StripeProvider.tsx`
-
-### UI sections duplicated
-
-- reusable section components exist
-- homepage and language page still hand-roll much of the same patterns
-
-### Documentation duplicated and stale
-
-- `README.md` is still create-next-app boilerplate
-- `CLAUDE.md` architecture rules no longer match the codebase
-
-## Build/Test Health
-
-### `npm run lint`
-
-Status: failed
-
-Key errors:
-
-- `src/app/admin/(dashboard)/bookings/page.tsx`
-- `src/app/admin/(dashboard)/users/page.tsx`
-- `src/components/sections/ReviewSlider.tsx`
-
-Warnings also show drift:
-
-- unused imports
-- unused props
-- stale eslint-disable directives
-
-### `npm test`
-
-Status: failed before running tests
-
-Root problem:
-
-- missing/invalid native binding for `rolldown`
-
-### `npm run build`
-
-Status: failed
-
-Root problems:
-
-- missing `lightningcss` native binary
-- deprecation warning for `middleware`
-
-Conclusion:
-
-- the repo is not in a release-ready local state even before application-level bugs are considered
+- pricing now flows from MongoDB through `getActiveTourConfig()` to all pages and SEO schemas
+- admin UI can edit pricing tiers, original price, and discount badge
+- however, component prop defaults and `FALLBACK_CONFIG` still create secondary sources
+- non-pricing business data (meeting point, duration, transport) still has no single owner
 
 ## Priority Remediation Plan
 
 ### Phase 0: immediate
 
-1. Disable or rewrite `POST /api/checkout/confirm` so it cannot create bookings or send emails without verified Stripe state.
-2. Remove hardcoded admin credentials from `scripts/seed-admin.ts` and rotate any password that may have been used.
-3. Restrict refund/cancel/status operations to clearly defined roles.
-4. Standardize all booking and blackout dates to ISO.
+1. Make capacity enforcement atomic.
+2. Add route-level schemas and `runValidators: true` on update paths.
+3. Stop replayed valid `paymentId` calls from resending customer/internal email.
+4. Sanitize `callbackUrl`.
+5. Finish ISO normalization in stats and admin date editing.
 
 ### Phase 1: within days
 
 1. Make Stripe webhook processing the only authoritative booking-finalization path.
-2. Add request validation schemas to every route.
-3. Enforce one active `TourConfig`.
-4. Centralize tour config values and remove conflicting fallbacks/static copies.
-5. Add abuse throttling for login and public booking endpoints.
+2. Define and enforce explicit `admin` vs `staff` permissions.
+3. ~~Centralize business config so booking, admin, SEO, and content read the same values.~~ **Partially done** — pricing now centralized via `getActiveTourConfig()` + admin UI; non-pricing config (meeting point, duration, transport) still duplicated.
+4. Add login and public-endpoint rate limiting.
+5. Replace the query-param confirmation page with a verified server-side confirmation flow.
 
 ### Phase 2: within 1-2 weeks
 
-1. Add CSP and other security headers.
-2. Migrate deprecated `middleware` to the Next 16-supported `proxy` approach.
-3. Fix the local package install/build/test chain.
-4. Replace query-param confirmation page with a server-validated confirmation page.
-5. Clean up draft-blog routing and legal-route gaps.
+1. Tighten CSP and remove unnecessary permissive directives.
+2. Resolve the `next` / `postcss` advisory with a credible upgrade plan.
+3. Clean up blog draft routing and placeholder slug handling.
+4. Finish legal-route and locale decisions.
+5. Migrate legacy `src/middleware.ts` to the current supported edge/proxy model.
 
 ### Phase 3: structural cleanup
 
-1. Refactor large pages into the documented component/content architecture or update the docs to match reality.
-2. Remove dead section components and unused dependencies such as `next-intl` and `framer-motion` if they are not actually part of the product plan.
-3. Consolidate SEO schema generation into a single source.
-
-## Suggested Target Design
-
-If the site is going to keep the current stack, the safest medium-term shape is:
-
-- one singleton `TourConfig`
-- one authoritative booking-finalization path via Stripe webhook
-- one normalized booking date format: ISO
-- one source of business truth for price, meeting point, slots, and duration
-- explicit RBAC for `admin` vs `staff`
-- schema validation at route boundaries
-- server-validated confirmation page
+1. Remove dead or half-adopted section/content abstractions, or fully adopt them.
+2. Consolidate SEO schema generation into one source.
+3. Remove unused props, imports, config objects, and stale lint suppressions.
 
 ## Final Assessment
 
-The website is salvageable without a full rewrite, but the booking flow should not be treated as trustworthy in its current form.
+The codebase is in a much healthier build/test state than before. Pricing is now centralized: all pages read from MongoDB via `getActiveTourConfig()`, the admin panel supports full pricing tier management, and `force-dynamic` ensures prices are never stale-cached. The remaining issues are still clustered around trust boundaries and non-pricing source-of-truth problems.
 
-The main risk is not a single bug. It is the combination of:
+The highest operational risk is still the combination of:
 
-- client-trusted booking finalization
-- duplicated write paths
-- duplicated config
-- weak validation
-- incomplete role boundaries
+- non-atomic slot capacity enforcement
+- duplicated booking-finalization paths
+- weak mutation validation
+- inconsistent RBAC
+- residual business config duplication (non-pricing fields)
 
-That combination means the app can drift into states that are both insecure and operationally hard to reason about.
+As long as those stay open, the app can still move into states that are valid enough to compile and pass tests, but unreliable enough to create booking errors, incorrect reporting, misleading content, or customer-support incidents.
