@@ -9,12 +9,22 @@ interface TimeSlot {
   label: string
 }
 
+interface PricingTier {
+  label: string
+  price: number
+  note: string
+  highlight: boolean
+}
+
 interface TourConfig {
   _id: string
   slug: string
   name: string
   description: string
   pricePerPerson: number
+  originalPrice: number
+  discountBadge: string
+  pricingTiers: PricingTier[]
   currency: string
   timeSlots: TimeSlot[]
   maxGuestsPerSlot: number
@@ -90,6 +100,29 @@ export default function TourConfigPage() {
     setTours(updated)
   }
 
+  function updateTier(tourIndex: number, tierIndex: number, field: keyof PricingTier, value: unknown) {
+    const updated = [...tours]
+    const tiers = [...(updated[tourIndex].pricingTiers || [])]
+    tiers[tierIndex] = { ...tiers[tierIndex], [field]: value }
+    updated[tourIndex] = { ...updated[tourIndex], pricingTiers: tiers }
+    setTours(updated)
+  }
+
+  function addTier(tourIndex: number) {
+    const updated = [...tours]
+    const tiers = [...(updated[tourIndex].pricingTiers || [])]
+    tiers.push({ label: '', price: 0, note: '', highlight: false })
+    updated[tourIndex] = { ...updated[tourIndex], pricingTiers: tiers }
+    setTours(updated)
+  }
+
+  function removeTier(tourIndex: number, tierIndex: number) {
+    const updated = [...tours]
+    const tiers = (updated[tourIndex].pricingTiers || []).filter((_, j) => j !== tierIndex)
+    updated[tourIndex] = { ...updated[tourIndex], pricingTiers: tiers }
+    setTours(updated)
+  }
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -136,7 +169,7 @@ export default function TourConfigPage() {
           </div>
 
           <div className="space-y-5 p-5">
-            {/* Basic info */}
+            {/* Pricing */}
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-xs font-medium uppercase text-gray-400">
@@ -152,6 +185,100 @@ export default function TourConfigPage() {
                   = €{(tour.pricePerPerson / 100).toFixed(2)}
                 </p>
               </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium uppercase text-gray-400">
+                  Original price (cents, 0 = hidden)
+                </label>
+                <input
+                  type="number"
+                  value={tour.originalPrice || 0}
+                  onChange={(e) => updateTour(i, 'originalPrice', parseInt(e.target.value))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  {tour.originalPrice > 0 ? `= €${(tour.originalPrice / 100).toFixed(2)} (strikethrough)` : 'No strikethrough price shown'}
+                </p>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium uppercase text-gray-400">
+                  Discount badge text
+                </label>
+                <input
+                  type="text"
+                  value={tour.discountBadge || ''}
+                  onChange={(e) => updateTour(i, 'discountBadge', e.target.value)}
+                  placeholder="e.g. 40% OFF"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  {tour.discountBadge ? 'Badge visible on site' : 'Empty = badge hidden'}
+                </p>
+              </div>
+            </div>
+
+            {/* Pricing Tiers */}
+            <div>
+              <label className="mb-2 block text-xs font-medium uppercase text-gray-400">
+                Pricing Tiers
+              </label>
+              <div className="space-y-2">
+                {(tour.pricingTiers || []).map((tier, ti) => (
+                  <div key={ti} className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                    <input
+                      type="text"
+                      value={tier.label}
+                      onChange={(e) => updateTier(i, ti, 'label', e.target.value)}
+                      placeholder="Label (e.g. Adult)"
+                      className="w-36 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={tier.price}
+                        onChange={(e) => updateTier(i, ti, 'price', parseInt(e.target.value))}
+                        placeholder="Price (cents)"
+                        className="w-28 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">
+                        €{(tier.price / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      value={tier.note}
+                      onChange={(e) => updateTier(i, ti, 'note', e.target.value)}
+                      placeholder="Note (e.g. Valid ID required)"
+                      className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                    />
+                    <label className="flex items-center gap-1.5 whitespace-nowrap text-xs text-gray-500">
+                      <input
+                        type="checkbox"
+                        checked={tier.highlight}
+                        onChange={(e) => updateTier(i, ti, 'highlight', e.target.checked)}
+                        className="h-3.5 w-3.5 rounded border-gray-300 text-[#0F8B6E] focus:ring-[#0F8B6E]"
+                      />
+                      Primary
+                    </label>
+                    <button
+                      onClick={() => removeTier(i, ti)}
+                      className="rounded-md p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => addTier(i)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#0F8B6E] hover:underline"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add pricing tier
+                </button>
+              </div>
+            </div>
+
+            {/* Other settings */}
+            <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-xs font-medium uppercase text-gray-400">
                   Max guests per slot
@@ -171,6 +298,17 @@ export default function TourConfigPage() {
                   type="number"
                   value={tour.minAdvanceDays}
                   onChange={(e) => updateTour(i, 'minAdvanceDays', parseInt(e.target.value))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium uppercase text-gray-400">
+                  Currency
+                </label>
+                <input
+                  type="text"
+                  value={tour.currency || 'eur'}
+                  onChange={(e) => updateTour(i, 'currency', e.target.value)}
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none"
                 />
               </div>
