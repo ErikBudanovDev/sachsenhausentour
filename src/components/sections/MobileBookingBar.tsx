@@ -21,7 +21,12 @@ function WhatsAppIcon({ className }: { className?: string }) {
   )
 }
 
-export function MobileBookingBar() {
+interface MobileBookingBarProps {
+  /** Formatted price string, e.g. "€29" */
+  priceLabel?: string
+}
+
+export function MobileBookingBar({ priceLabel = '€29' }: MobileBookingBarProps) {
   const [visible, setVisible] = useState(false)
 
   /* Show bar after scrolling past the hero (≈ 400px) */
@@ -42,7 +47,7 @@ export function MobileBookingBar() {
         {/* Statement */}
         <div className="min-w-0 flex-shrink">
           <p className="font-heading text-base font-bold text-accent leading-tight">
-            From €29
+            From {priceLabel}
           </p>
           <p className="text-[11px] text-text-muted leading-tight">
             FREE cancellation

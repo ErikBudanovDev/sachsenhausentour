@@ -17,6 +17,7 @@ import { BookingWidget } from '@/components/booking'
 import { siteConfig } from '@/config/site'
 import { bookContent } from '@/content/en/book'
 import { getActiveTourConfig } from '@/lib/tour-config'
+import { formatPrice } from '@/lib/format-price'
 
 export const metadata: Metadata = {
   title: 'Book Sachsenhausen Tour Berlin — Concentration Camp Tickets & Availability',
@@ -56,6 +57,12 @@ export default async function BookPage() {
     ? tourConfig.blackoutDates
     : bookingWidget.blackoutDates
   const dynamicMinAdvanceDays = tourConfig.minAdvanceDays || bookingWidget.minAdvanceDays
+
+  // Override the "Price" highlight with the dynamic value from DB
+  const dynamicHighlights = highlights.map((h) =>
+    h.icon === 'euro' ? { ...h, value: `${formatPrice(tourConfig.pricePerPerson, tourConfig.currency)} per person` } : h
+  )
+
   const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?text=${encodeURIComponent("Hi! I'd like to book the Sachsenhausen Tour.")}`
 
   return (
@@ -93,7 +100,7 @@ export default async function BookPage() {
       {/* Quick highlights strip */}
       <Section background="secondary" spacing="md">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {highlights.map((item) => {
+          {dynamicHighlights.map((item) => {
             const Icon = iconMap[item.icon]
             return (
               <div key={item.label} className="flex items-center gap-3 rounded-sm bg-surface/50 p-4">

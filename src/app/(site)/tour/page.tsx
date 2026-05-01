@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Section, Accordion, Button } from '@/components/ui'
+import { getActiveTourConfig } from '@/lib/tour-config'
+import { formatPrice } from '@/lib/format-price'
 
 export const metadata: Metadata = {
   title: 'Sachsenhausen Concentration Camp Memorial Tour — Tour Details & Itinerary',
@@ -14,7 +16,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function TourPage() {
+export default async function TourPage() {
+  const config = await getActiveTourConfig()
+
   return (
     <>
       {/* Hero */}
@@ -47,7 +51,7 @@ export default function TourPage() {
                 ['Meeting Point', 'Generator Berlin Alexanderplatz'],
                 ['Group Size', 'Small groups for a personal experience'],
                 ['Languages', 'English (German and Spanish on select dates)'],
-                ['Price', '\u20AC29 per person'],
+                ['Price', `${formatPrice(config.pricePerPerson, config.currency)} per person`],
               ].map(([label, value]) => (
                 <div key={label} className="border-b border-border pb-3">
                   <dt className="text-xs font-medium uppercase tracking-widest text-accent">{label}</dt>

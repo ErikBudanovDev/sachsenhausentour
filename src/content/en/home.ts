@@ -317,7 +317,7 @@ export const homeContent: HomeContent = {
     items: [
       {
         question: 'Do you need tickets for Sachsenhausen concentration camp?',
-        answer: 'Entry to the Sachsenhausen Memorial is free — no Sachsenhausen concentration camp tickets are required. However, if you want a guided experience with expert historical commentary, you can book a Sachsenhausen tour from Berlin starting at \u20AC29 per person. Our concentration camp memorial tour includes a trained historian, small group size, and transport guidance from central Berlin.',
+        answer: 'Entry to the Sachsenhausen Memorial is free — no Sachsenhausen concentration camp tickets are required. However, if you want a guided experience with expert historical commentary, you can book a Sachsenhausen tour from Berlin online. Our concentration camp memorial tour includes a trained historian, small group size, and transport guidance from central Berlin. Check our booking page for current pricing and availability.',
       },
       {
         question: 'How long is the Sachsenhausen tour from Berlin?',

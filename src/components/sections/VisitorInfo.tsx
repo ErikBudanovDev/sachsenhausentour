@@ -8,8 +8,22 @@ import {
   Info,
   ExternalLink,
 } from 'lucide-react'
+import { formatPrice, formatPricePP } from '@/lib/format-price'
+import type { PublicPricingTier } from '@/lib/tour-config'
 
-export function VisitorInfo() {
+interface VisitorInfoProps {
+  pricingTiers?: PublicPricingTier[]
+  currency?: string
+}
+
+export function VisitorInfo({
+  pricingTiers = [
+    { label: 'Adult', price: 2900, note: 'Standard rate', highlight: true },
+    { label: 'Student (valid ID)', price: 2400, note: 'Valid student ID required', highlight: false },
+    { label: 'Group (8+)', price: 2200, note: 'Per person, 8 or more guests', highlight: false },
+  ],
+  currency = 'eur',
+}: VisitorInfoProps) {
   return (
     <section className="bg-primary py-14 md:py-20" id="visitor-info">
       <div className="mx-auto max-w-6xl px-4">
@@ -84,17 +98,15 @@ export function VisitorInfo() {
               <div>
                 <p className="text-sm font-semibold mb-2">Guided Tour Prices</p>
                 <div className="space-y-2">
-                  {[
-                    { label: 'Adult', price: '€29' },
-                    { label: 'Student (valid ID)', price: '€24' },
-                    { label: 'Group (8+)', price: '€22 / person' },
-                  ].map((tier) => (
+                  {pricingTiers.map((tier) => (
                     <div
                       key={tier.label}
                       className="flex items-center justify-between rounded bg-secondary px-3 py-2"
                     >
                       <span className="text-sm text-text">{tier.label}</span>
-                      <span className="font-heading text-sm font-bold">{tier.price}</span>
+                      <span className="font-heading text-sm font-bold">
+                        {tier.highlight ? formatPrice(tier.price, currency) : formatPricePP(tier.price, currency)}
+                      </span>
                     </div>
                   ))}
                 </div>

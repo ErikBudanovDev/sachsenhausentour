@@ -1,6 +1,13 @@
 import { siteConfig } from '@/config/site'
 
-export function TourSchema() {
+interface TourSchemaProps {
+  /** Price in cents (e.g. 2900 = 29.00) */
+  priceInCents?: number
+  /** Currency code */
+  currency?: string
+}
+
+export function TourSchema({ priceInCents = 2900, currency = 'EUR' }: TourSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
@@ -39,8 +46,8 @@ export function TourSchema() {
     },
     offers: {
       '@type': 'Offer',
-      price: '29.00',
-      priceCurrency: 'EUR',
+      price: (priceInCents / 100).toFixed(2),
+      priceCurrency: currency.toUpperCase(),
       availability: 'https://schema.org/InStock',
       url: `${siteConfig.url}/book`,
       validFrom: '2024-01-01',

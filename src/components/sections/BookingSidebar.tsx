@@ -16,9 +16,21 @@ import {
 } from 'lucide-react'
 import { siteConfig } from '@/config/site'
 import type { Review } from './ReviewSlider'
+import type { PublicPricingTier } from '@/lib/tour-config'
+import { formatPrice, formatPricePP } from '@/lib/format-price'
 
 interface BookingSidebarProps {
   reviews: Review[]
+  /** Price per person in cents */
+  pricePerPerson?: number
+  /** Original / strikethrough price in cents (0 = hidden) */
+  originalPrice?: number
+  /** Discount badge text (empty = hidden) */
+  discountBadge?: string
+  /** Pricing tiers for display */
+  pricingTiers?: PublicPricingTier[]
+  /** Currency code */
+  currency?: string
 }
 
 /* ─── Icons ─── */
@@ -80,7 +92,18 @@ function MiniReviewCard({ review }: { review: Review }) {
 }
 
 /* ─── Main Sidebar ─── */
-export function BookingSidebar({ reviews }: BookingSidebarProps) {
+export function BookingSidebar({
+  reviews,
+  pricePerPerson = 2900,
+  originalPrice = 4900,
+  discountBadge = '40% OFF',
+  pricingTiers = [
+    { label: 'Adult', price: 2900, note: 'Standard rate', highlight: true },
+    { label: 'Student (valid ID)', price: 2400, note: 'Valid student ID required', highlight: false },
+    { label: 'Group (8+)', price: 2200, note: 'Per person, 8 or more guests', highlight: false },
+  ],
+  currency = 'eur',
+}: BookingSidebarProps) {
   const [reviewIdx, setReviewIdx] = useState(0)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -104,26 +127,26 @@ export function BookingSidebar({ reviews }: BookingSidebarProps) {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-sm text-white/50 line-through">€49</span>
-                <span className="font-heading text-3xl font-bold text-white">€29</span>
+                {originalPrice > 0 && (
+                  <span className="text-sm text-white/50 line-through">{formatPrice(originalPrice, currency)}</span>
+                )}
+                <span className="font-heading text-3xl font-bold text-white">{formatPrice(pricePerPerson, currency)}</span>
               </div>
               <p className="text-xs text-white/60">per person</p>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-              <span className="text-xs font-semibold text-white">40% OFF</span>
-            </div>
+            {discountBadge && (
+              <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                <span className="text-xs font-semibold text-white">{discountBadge}</span>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="p-5">
           {/* Pricing tiers */}
           <div className="space-y-1.5">
-            {[
-              { label: 'Adult', price: '€29', highlight: true },
-              { label: 'Student (valid ID)', price: '€24', highlight: false },
-              { label: 'Group (8+)', price: '€22 pp', highlight: false },
-            ].map((tier) => (
+            {pricingTiers.map((tier) => (
               <div
                 key={tier.label}
                 className={`flex items-center justify-between rounded-lg px-4 py-2.5 ${
@@ -132,7 +155,7 @@ export function BookingSidebar({ reviews }: BookingSidebarProps) {
               >
                 <span className="text-sm text-text">{tier.label}</span>
                 <span className={`font-heading text-sm font-bold ${tier.highlight ? 'text-accent' : 'text-text'}`}>
-                  {tier.price}
+                  {tier.highlight ? formatPrice(tier.price, currency) : formatPricePP(tier.price, currency)}
                 </span>
               </div>
             ))}

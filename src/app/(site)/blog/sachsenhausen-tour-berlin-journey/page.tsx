@@ -36,7 +36,7 @@ const articleFAQs = [
   },
   {
     question: 'Do I need to book a guided tour to visit Sachsenhausen?',
-    answer: 'Entry to the Sachsenhausen Memorial is free for self-guided visits. However, a guided Sachsenhausen Tour Berlin from €29 per person provides essential historical context, structured navigation, and personal accounts that signs alone cannot convey.',
+    answer: 'Entry to the Sachsenhausen Memorial is free for self-guided visits. However, a guided Sachsenhausen Tour Berlin provides essential historical context, structured navigation, and personal accounts that signs alone cannot convey. See our booking page for current pricing.',
   },
   {
     question: 'How should I prepare for a visit to Sachsenhausen?',

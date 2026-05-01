@@ -25,6 +25,8 @@ import { ReviewSlider } from '@/components/sections/ReviewSlider'
 import type { Review } from '@/components/sections/ReviewSlider'
 import reviewsData from '@/content/reviews.json'
 import { siteConfig } from '@/config/site'
+import { getActiveTourConfig } from '@/lib/tour-config'
+import { formatPrice, formatPricePP } from '@/lib/format-price'
 
 export const metadata: Metadata = {
   title: 'Sachsenhausen Tour Berlin — Concentration Camp Memorial Tour from Berlin | €29',
@@ -66,7 +68,8 @@ const galleryImages = [
 
 const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?text=${encodeURIComponent('Hi! I would like to book the Sachsenhausen Tour.')}`
 
-export default function HomePage() {
+export default async function HomePage() {
+  const config = await getActiveTourConfig()
   const c = homeContent
 
   return (
@@ -122,7 +125,7 @@ export default function HomePage() {
 
               {/* Mobile CTA (booking card hidden on mobile) */}
               <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:hidden">
-                <Button href="/book#booking" size="lg">Book Your Tour — €29</Button>
+                <Button href="/book#booking" size="lg">Book Your Tour — {formatPrice(config.pricePerPerson, config.currency)}</Button>
                 <Button href="#tour-details" variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
                   See Tour Details
                 </Button>
@@ -137,26 +140,26 @@ export default function HomePage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm text-white/60 line-through">€49</span>
-                        <span className="font-heading text-3xl font-bold text-white">€29</span>
+                        {config.originalPrice > 0 && (
+                          <span className="text-sm text-white/60 line-through">{formatPrice(config.originalPrice, config.currency)}</span>
+                        )}
+                        <span className="font-heading text-3xl font-bold text-white">{formatPrice(config.pricePerPerson, config.currency)}</span>
                       </div>
                       <p className="text-xs text-white/70">per person</p>
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1">
-                      <Sparkles className="h-3.5 w-3.5 text-white" />
-                      <span className="text-xs font-semibold text-white">40% OFF</span>
-                    </div>
+                    {config.discountBadge && (
+                      <div className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1">
+                        <Sparkles className="h-3.5 w-3.5 text-white" />
+                        <span className="text-xs font-semibold text-white">{config.discountBadge}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="p-5 space-y-4">
                   {/* Pricing tiers */}
                   <div className="space-y-1.5">
-                    {[
-                      { label: 'Adult', price: '€29', highlight: true },
-                      { label: 'Student (valid ID)', price: '€24', highlight: false },
-                      { label: 'Group (8+)', price: '€22 pp', highlight: false },
-                    ].map((tier) => (
+                    {config.pricingTiers.map((tier) => (
                       <div
                         key={tier.label}
                         className={`flex items-center justify-between rounded-lg px-4 py-2.5 ${
@@ -165,7 +168,7 @@ export default function HomePage() {
                       >
                         <span className="text-sm text-text">{tier.label}</span>
                         <span className={`font-heading text-sm font-bold ${tier.highlight ? 'text-accent' : 'text-text'}`}>
-                          {tier.price}
+                          {tier.highlight ? formatPrice(tier.price, config.currency) : formatPricePP(tier.price, config.currency)}
                         </span>
                       </div>
                     ))}
@@ -292,7 +295,7 @@ export default function HomePage() {
       />
 
       {/* ═══════════════ 4. OPENING HOURS, ADMISSION & DIRECTIONS ═══════════════ */}
-      <VisitorInfo />
+      <VisitorInfo pricingTiers={config.pricingTiers} currency={config.currency} />
 
       {/* ═══════════════ 5. ITINERARY ═══════════════ */}
       <Section background="secondary" spacing="lg">
@@ -532,7 +535,9 @@ export default function HomePage() {
           <h2 className="font-heading text-3xl font-bold text-text sm:text-4xl">
             {c.finalCta.heading}
           </h2>
-          <p className="mt-3 text-text-muted">{c.finalCta.subheading}</p>
+          <p className="mt-3 text-text-muted">
+            Daily departures from Berlin. Small groups. Expert historians. {formatPrice(config.pricePerPerson, config.currency)} per person.
+          </p>
           <div className="mt-8">
             <Button href="/book#booking" size="lg">Book Your Tour Now</Button>
           </div>
@@ -542,10 +547,10 @@ export default function HomePage() {
 
       {/* Structured Data */}
       <FAQSchema items={c.faq.items} />
-      <TourSchema />
+      <TourSchema priceInCents={config.pricePerPerson} currency={config.currency.toUpperCase()} />
 
       {/* Sticky mobile booking bar */}
-      <MobileBookingBar />
+      <MobileBookingBar priceLabel={formatPrice(config.pricePerPerson, config.currency)} />
     </>
   )
 }

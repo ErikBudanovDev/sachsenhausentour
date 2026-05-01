@@ -1,6 +1,14 @@
 import { siteConfig } from '@/config/site'
+import { formatPrice } from '@/lib/format-price'
 
-export function OrganizationSchema() {
+interface OrganizationSchemaProps {
+  /** Price per person in cents */
+  priceInCents?: number
+  /** Currency code */
+  currency?: string
+}
+
+export function OrganizationSchema({ priceInCents = 2900, currency = 'eur' }: OrganizationSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'TouristInformationCenter',
@@ -36,7 +44,7 @@ export function OrganizationSchema() {
       bestRating: '5',
       worstRating: '1',
     },
-    priceRange: '€29',
+    priceRange: formatPrice(priceInCents, currency),
   }
 
   return (

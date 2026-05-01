@@ -17,6 +17,8 @@ import reviewsData from '@/content/reviews.json'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { MobileBookingBar } from '@/components/sections/MobileBookingBar'
 import { siteConfig } from '@/config/site'
+import { getActiveTourConfig } from '@/lib/tour-config'
+import { formatPrice, formatPricePP } from '@/lib/format-price'
 
 export const metadata: Metadata = {
   title: 'Campo de Concentración de Sachsenhausen – Tour Guiado desde Berlín | €29',
@@ -35,7 +37,7 @@ const highlights = [
   { icon: Clock, label: 'Duración', value: '6 horas (ida y vuelta)' },
   { icon: MapPin, label: 'Punto de encuentro', value: 'Berlín Alexanderplatz' },
   { icon: Users, label: 'Grupo', value: 'Máximo 20 personas' },
-  { icon: Euro, label: 'Precio', value: 'Desde €29 por persona' },
+  { icon: Euro, label: 'Precio', value: 'DYNAMIC_PRICE' },
 ]
 
 const whyChoose = [
@@ -57,7 +59,7 @@ const itinerary = [
 const faqs = [
   {
     question: '¿Se necesitan entradas para Sachsenhausen?',
-    answer: 'La entrada al Memorial de Sachsenhausen es gratuita. Sin embargo, los tours guiados con historiadores expertos están disponibles desde €29 por persona y proporcionan un contexto histórico esencial.',
+    answer: 'La entrada al Memorial de Sachsenhausen es gratuita. Sin embargo, los tours guiados con historiadores expertos están disponibles y proporcionan un contexto histórico esencial.',
   },
   {
     question: '¿Cuánto dura el tour desde Berlín?',
@@ -83,7 +85,8 @@ const faqs = [
 
 const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?text=${encodeURIComponent('¡Hola! Me gustaría reservar el tour de Sachsenhausen.')}`
 
-export default function SpanishLandingPage() {
+export default async function SpanishLandingPage() {
+  const config = await getActiveTourConfig()
   return (
     <>
       {/* Hero */}
@@ -104,7 +107,7 @@ export default function SpanishLandingPage() {
             Únete a un recorrido de 6 horas dirigido por historiadores desde Berlín al Memorial de Sachsenhausen. Grupos pequeños, contexto profundo y un enfoque respetuoso.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button href="/book#booking" size="lg">Reservar Tour — €29</Button>
+            <Button href="/book#booking" size="lg">Reservar Tour — {formatPrice(config.pricePerPerson, config.currency)}</Button>
             <Button href={whatsappHref} variant="secondary" size="lg" className="border-white/40 text-white hover:bg-white/10 hover:text-white">
               <MessageCircle className="mr-2 h-5 w-5" />
               WhatsApp
@@ -117,7 +120,9 @@ export default function SpanishLandingPage() {
       {/* Highlights strip */}
       <Section background="secondary" spacing="md">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {highlights.map(({ icon: Icon, label, value }) => (
+          {highlights.map(({ icon: Icon, label, value: rawValue }) => {
+            const value = rawValue === 'DYNAMIC_PRICE' ? `Desde ${formatPrice(config.pricePerPerson, config.currency)} por persona` : rawValue
+            return (
             <div key={label} className="flex items-center gap-3 rounded-md bg-surface/50 p-4">
               <Icon className="h-5 w-5 shrink-0 text-accent" />
               <div>
@@ -125,7 +130,7 @@ export default function SpanishLandingPage() {
                 <p className="text-sm text-text">{value}</p>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </Section>
 
@@ -210,16 +215,14 @@ export default function SpanishLandingPage() {
         <div className="mx-auto max-w-md">
           <Card padding="lg" className="text-center">
             <p className="text-sm font-medium uppercase tracking-widest text-accent">Por Persona</p>
-            <p className="mt-2 font-heading text-5xl font-bold text-navy">€29</p>
+            <p className="mt-2 font-heading text-5xl font-bold text-navy">{formatPrice(config.pricePerPerson, config.currency)}</p>
             <div className="mt-6 space-y-2">
-              {[
-                { label: 'Adulto', price: '€29' },
-                { label: 'Estudiante', price: '€24' },
-                { label: 'Grupo (8+)', price: '€22' },
-              ].map((tier) => (
+              {config.pricingTiers.map((tier) => (
                 <div key={tier.label} className="flex items-center justify-between rounded-md bg-secondary px-4 py-2.5">
                   <span className="font-medium text-text">{tier.label}</span>
-                  <span className="font-heading text-lg font-bold text-navy">{tier.price}</span>
+                  <span className="font-heading text-lg font-bold text-navy">
+                    {tier.highlight ? formatPrice(tier.price, config.currency) : formatPricePP(tier.price, config.currency)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -270,7 +273,7 @@ export default function SpanishLandingPage() {
             ¿Listo Para Vivir la Historia?
           </h2>
           <p className="mt-4 text-text-muted">
-            Salidas diarias desde Berlín. Grupos pequeños. Historiadores expertos. €29 por persona.
+            Salidas diarias desde Berlín. Grupos pequeños. Historiadores expertos. {formatPrice(config.pricePerPerson, config.currency)} por persona.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button href="/book#booking" size="lg">Reservar Tour</Button>
@@ -289,7 +292,7 @@ export default function SpanishLandingPage() {
       <FAQSchema items={faqs} />
 
       {/* Sticky mobile booking bar */}
-      <MobileBookingBar />
+      <MobileBookingBar priceLabel={formatPrice(config.pricePerPerson, config.currency)} />
     </>
   )
 }

@@ -37,7 +37,7 @@ const articleFAQs = [
   },
   {
     question: 'Do you need tickets for Sachsenhausen?',
-    answer: 'Entry to the Sachsenhausen Memorial is free. However, guided tours with expert historians are available from €29 per person and provide essential historical context that is difficult to get on a self-guided visit.',
+    answer: 'Entry to the Sachsenhausen Memorial is free. However, guided tours with expert historians are available and provide essential historical context that is difficult to get on a self-guided visit. Check our booking page for current pricing.',
   },
 ]
 

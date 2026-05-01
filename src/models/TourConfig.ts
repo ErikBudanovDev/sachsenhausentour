@@ -1,11 +1,25 @@
 import mongoose, { Schema, type Document } from 'mongoose'
 
+export interface PricingTier {
+  label: string
+  /** Price in cents */
+  price: number
+  note: string
+  highlight: boolean
+}
+
 export interface ITourConfig extends Document {
   /** Slug identifier — e.g. "sachsenhausen-tour" */
   slug: string
   name: string
   description: string
   pricePerPerson: number
+  /** Original / strikethrough price in cents (e.g. 4900 = €49) */
+  originalPrice: number
+  /** Discount badge text (e.g. "40% OFF") — empty string hides badge */
+  discountBadge: string
+  /** Pricing tiers displayed on the site (Adult, Student, Group, etc.) */
+  pricingTiers: PricingTier[]
   currency: string
   /** Available time slots */
   timeSlots: { id: string; time: string; label: string }[]
@@ -29,6 +43,16 @@ const TourConfigSchema = new Schema<ITourConfig>(
     name: { type: String, required: true },
     description: { type: String, default: '' },
     pricePerPerson: { type: Number, required: true },
+    originalPrice: { type: Number, default: 0 },
+    discountBadge: { type: String, default: '' },
+    pricingTiers: [
+      {
+        label: { type: String, required: true },
+        price: { type: Number, required: true },
+        note: { type: String, default: '' },
+        highlight: { type: Boolean, default: false },
+      },
+    ],
     currency: { type: String, default: 'eur' },
     timeSlots: [
       {

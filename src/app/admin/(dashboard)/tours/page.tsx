@@ -62,6 +62,13 @@ export default function TourConfigPage() {
         name: 'Sachsenhausen Memorial Tour',
         description: 'A full-day guided tour of the Sachsenhausen concentration camp from Berlin',
         pricePerPerson: 2900,
+        originalPrice: 4900,
+        discountBadge: '40% OFF',
+        pricingTiers: [
+          { label: 'Adult', price: 2900, note: 'Standard rate', highlight: true },
+          { label: 'Student (valid ID)', price: 2400, note: 'Valid student ID required', highlight: false },
+          { label: 'Group (8+)', price: 2200, note: 'Per person, 8 or more guests', highlight: false },
+        ],
         timeSlots: [{ id: 'morning', time: '10:00 AM', label: 'Morning Tour' }],
         maxGuestsPerSlot: 20,
         blackoutDates: [],
