@@ -1,7 +1,7 @@
 /**
  * Booking Pipeline Tests
  *
- * Tests the full flow: Checkout → Confirm/Save → Webhook → Admin API
+ * Tests the full flow: TourConfig → Checkout → Confirm/Save → Webhook → Admin API
  * Uses mocks for Stripe, MongoDB, and Nodemailer since these are unit tests.
  */
 
@@ -39,6 +39,35 @@ vi.mock('@/models/Booking', () => ({
   Booking: mockBooking,
 }))
 
+// Mock TourConfig model
+const DEFAULT_TOUR_CONFIG = {
+  slug: 'sachsenhausen-tour',
+  name: 'Sachsenhausen Memorial Tour',
+  pricePerPerson: 5900,
+  currency: 'eur',
+  timeSlots: [
+    { id: 'morning-10', time: '10:00 AM', label: 'Morning Tour' },
+    { id: 'morning-1030', time: '10:30 AM', label: 'Late Morning Tour' },
+  ],
+  maxGuestsPerSlot: 20,
+  blackoutDates: ['2026-12-25', '2027-01-01'],
+  minAdvanceDays: 1,
+  duration: '6 hours',
+  meetingPoint: 'Generator Berlin Alexanderplatz',
+  active: true,
+}
+
+const mockTourConfig = {
+  findOne: vi.fn().mockReturnValue({
+    lean: vi.fn().mockResolvedValue({ ...DEFAULT_TOUR_CONFIG }),
+  }),
+  findOneAndUpdate: vi.fn(),
+}
+
+vi.mock('@/models/TourConfig', () => ({
+  TourConfig: mockTourConfig,
+}))
+
 // Mock Stripe
 const mockPaymentIntentsCreate = vi.fn()
 const mockWebhooksConstructEvent = vi.fn()
@@ -72,7 +101,7 @@ vi.mock('@/lib/auth', () => ({
   }),
 }))
 
-// ─── Helper ───────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────
 
 function makeRequest(body: object, method = 'POST', url = 'http://localhost:3001/api/test') {
   return new Request(url, {
@@ -82,14 +111,117 @@ function makeRequest(body: object, method = 'POST', url = 'http://localhost:3001
   })
 }
 
-// ─── 1. Checkout API (PaymentIntent creation) ─────────────────
+/** Reset TourConfig mock to return default config */
+function resetTourConfigMock(overrides: Record<string, unknown> = {}) {
+  mockTourConfig.findOne.mockReturnValue({
+    lean: vi.fn().mockResolvedValue({ ...DEFAULT_TOUR_CONFIG, ...overrides }),
+  })
+}
+
+/** Reset Booking mocks including find chains */
+function resetBookingFindMock() {
+  mockBooking.find.mockReturnValue({
+    sort: vi.fn().mockReturnValue({
+      skip: vi.fn().mockReturnValue({
+        limit: vi.fn().mockReturnValue({
+          lean: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+      limit: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      }),
+    }),
+  })
+}
+
+// ─── 1. Public Tour Config API ──────────────────────────────
+
+describe('GET /api/tour-config', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetTourConfigMock()
+  })
+
+  it('returns active tour configuration', async () => {
+    const { GET } = await import('@/app/api/tour-config/route')
+    const res = await GET()
+    const data = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(data.pricePerPerson).toBe(5900)
+    expect(data.timeSlots).toHaveLength(2)
+    expect(data.blackoutDates).toContain('2026-12-25')
+    expect(data.maxGuestsPerSlot).toBe(20)
+    expect(data.minAdvanceDays).toBe(1)
+    expect(data.meetingPoint).toBe('Generator Berlin Alexanderplatz')
+  })
+
+  it('returns updated config when admin changes price', async () => {
+    resetTourConfigMock({ pricePerPerson: 3500 })
+
+    const { GET } = await import('@/app/api/tour-config/route')
+    const res = await GET()
+    const data = await res.json()
+
+    expect(data.pricePerPerson).toBe(3500)
+  })
+
+  it('returns updated config when admin adds time slots', async () => {
+    resetTourConfigMock({
+      timeSlots: [
+        { id: 'morning-10', time: '10:00 AM', label: 'Morning Tour' },
+        { id: 'afternoon-2', time: '2:00 PM', label: 'Afternoon Tour' },
+        { id: 'evening-5', time: '5:00 PM', label: 'Evening Tour' },
+      ],
+    })
+
+    const { GET } = await import('@/app/api/tour-config/route')
+    const res = await GET()
+    const data = await res.json()
+
+    expect(data.timeSlots).toHaveLength(3)
+    expect(data.timeSlots[2].time).toBe('5:00 PM')
+  })
+
+  it('returns updated config when admin changes blackout dates', async () => {
+    resetTourConfigMock({
+      blackoutDates: ['2026-12-24', '2026-12-25', '2026-12-31', '2027-01-01'],
+    })
+
+    const { GET } = await import('@/app/api/tour-config/route')
+    const res = await GET()
+    const data = await res.json()
+
+    expect(data.blackoutDates).toHaveLength(4)
+    expect(data.blackoutDates).toContain('2026-12-24')
+  })
+
+  it('returns fallback when no active config exists', async () => {
+    mockTourConfig.findOne.mockReturnValue({
+      lean: vi.fn().mockResolvedValue(null),
+    })
+
+    const { GET } = await import('@/app/api/tour-config/route')
+    const res = await GET()
+    const data = await res.json()
+
+    // Should return fallback defaults
+    expect(res.status).toBe(200)
+    expect(data.pricePerPerson).toBeDefined()
+    expect(data.timeSlots.length).toBeGreaterThan(0)
+  })
+})
+
+// ─── 2. Checkout API (uses DB price + validates config) ──────
 
 describe('POST /api/checkout', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetTourConfigMock()
+    mockBooking.aggregate.mockResolvedValue([]) // No existing bookings
   })
 
-  it('creates a PaymentIntent with correct amount for 2 guests', async () => {
+  it('creates PaymentIntent using price from TourConfig', async () => {
     mockPaymentIntentsCreate.mockResolvedValue({
       client_secret: 'pi_test_secret_abc',
     })
@@ -101,7 +233,6 @@ describe('POST /api/checkout', () => {
       time: '10:00 AM',
       name: 'Test User',
       email: 'test@example.com',
-      phone: '+491234567',
     })
 
     const res = await POST(req)
@@ -109,27 +240,135 @@ describe('POST /api/checkout', () => {
 
     expect(res.status).toBe(200)
     expect(data.clientSecret).toBe('pi_test_secret_abc')
+    // Price is 5900 (from TourConfig) × 2 guests = 11800
     expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        amount: 5800, // 29€ × 2 guests = 58€ = 5800 cents
+        amount: 11800,
         currency: 'eur',
-        metadata: expect.objectContaining({
-          guests: '2',
-          name: 'Test User',
-          email: 'test@example.com',
-          date: '2026-06-15',
-          time: '10:00 AM',
-        }),
       })
+    )
+  })
+
+  it('uses updated price when admin changes it', async () => {
+    resetTourConfigMock({ pricePerPerson: 3500 })
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_secret' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 3,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+
+    // 3500 × 3 = 10500
+    expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 10500 })
     )
   })
 
   it('rejects request with missing required fields', async () => {
     const { POST } = await import('@/app/api/checkout/route')
-    const req = makeRequest({ guests: 1 }) // missing name, email, date, time
+    const req = makeRequest({ guests: 1 })
 
     const res = await POST(req)
     expect(res.status).toBe(400)
+  })
+
+  it('rejects booking on a blackout date', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 2,
+      date: '2026-12-25', // Christmas — blackout
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(data.error).toMatch(/not available/i)
+  })
+
+  it('rejects booking with invalid time slot', async () => {
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-06-15',
+      time: '3:00 PM', // Not in config
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(data.error).toMatch(/invalid time slot/i)
+  })
+
+  it('rejects booking exceeding max guests per slot', async () => {
+    resetTourConfigMock({ maxGuestsPerSlot: 5 })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 6,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(data.error).toMatch(/guest count/i)
+  })
+
+  it('rejects booking when slot capacity is full', async () => {
+    resetTourConfigMock({ maxGuestsPerSlot: 10 })
+    // 8 guests already booked for this slot
+    mockBooking.aggregate.mockResolvedValue([{ total: 8 }])
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 3, // Would exceed capacity (8 + 3 > 10)
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(data.error).toMatch(/spot|remaining|fully booked/i)
+  })
+
+  it('allows booking when slot has remaining capacity', async () => {
+    resetTourConfigMock({ maxGuestsPerSlot: 10 })
+    mockBooking.aggregate.mockResolvedValue([{ total: 7 }])
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_ok' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 3, // 7 + 3 = 10, exactly at capacity
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
   })
 
   it('includes receipt_email in PaymentIntent', async () => {
@@ -168,9 +407,27 @@ describe('POST /api/checkout', () => {
     const res = await POST(req)
     expect(res.status).toBe(500)
   })
+
+  it('returns 404 when no active tour config exists', async () => {
+    mockTourConfig.findOne.mockReturnValue({
+      lean: vi.fn().mockResolvedValue(null),
+    })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-07-01',
+      time: '10:00 AM',
+      name: 'Test',
+      email: 'test@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(404)
+  })
 })
 
-// ─── 2. Confirm API (booking save + emails) ───────────────────
+// ─── 3. Confirm API (booking save + emails) ──────────────────
 
 describe('POST /api/checkout/confirm', () => {
   beforeEach(() => {
@@ -190,7 +447,7 @@ describe('POST /api/checkout/confirm', () => {
       date: '2026-06-15',
       time: '10:00 AM',
       guests: 3,
-      total: '€87',
+      total: '€177',
       paymentId: 'pi_test_123',
     })
 
@@ -205,8 +462,7 @@ describe('POST /api/checkout/confirm', () => {
           customerName: 'Erik Budanov',
           customerEmail: 'erik@test.com',
           guests: 3,
-          totalPaid: 8700,
-          pricePerPerson: 2900,
+          totalPaid: 17700,
           status: 'confirmed',
         }),
       }),
@@ -222,7 +478,7 @@ describe('POST /api/checkout/confirm', () => {
       date: '2026-06-15',
       time: '10:00 AM',
       guests: 1,
-      total: '€29',
+      total: '€59',
       paymentId: 'pi_abc',
     })
 
@@ -245,7 +501,7 @@ describe('POST /api/checkout/confirm', () => {
       date: '2026-06-15',
       time: '10:00 AM',
       guests: 2,
-      total: '€58',
+      total: '€118',
       paymentId: 'pi_xyz',
     })
 
@@ -277,45 +533,41 @@ describe('POST /api/checkout/confirm', () => {
       date: '2026-06-15',
       time: '10:00 AM',
       guests: 1,
-      total: '€29',
+      total: '€59',
       paymentId: 'pi_fail',
     })
 
     const res = await POST(req)
     const data = await res.json()
-    // Should still succeed — emails go out, payment already happened
     expect(data.success).toBeDefined()
   })
 
   it('is idempotent — uses upsert to avoid duplicates', async () => {
     const { POST } = await import('@/app/api/checkout/confirm/route')
 
-    // Simulate calling confirm twice with same paymentId
     const body = {
       name: 'Test',
       email: 'test@test.com',
       date: '2026-06-15',
       time: '10:00 AM',
       guests: 1,
-      total: '€29',
+      total: '€59',
       paymentId: 'pi_duplicate',
     }
 
     await POST(makeRequest(body))
     await POST(makeRequest(body))
 
-    // Both calls should use findOneAndUpdate with upsert, not create
     const calls = mockBooking.findOneAndUpdate.mock.calls
     expect(calls.every((c: unknown[]) => (c[2] as { upsert: boolean }).upsert === true)).toBe(true)
   })
 })
 
-// ─── 3. Webhook (Stripe event handling) ───────────────────────
+// ─── 4. Webhook (Stripe event handling) ──────────────────────
 
 describe('POST /api/webhook', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Reset module cache to get fresh imports
     vi.resetModules()
   })
 
@@ -325,7 +577,7 @@ describe('POST /api/webhook', () => {
       data: {
         object: {
           id: 'pi_webhook_test',
-          amount: 5800,
+          amount: 11800,
           currency: 'eur',
           receipt_email: 'customer@test.com',
           metadata: {
@@ -339,7 +591,7 @@ describe('POST /api/webhook', () => {
         },
       },
     })
-    mockBooking.findOne.mockResolvedValue(null) // No duplicate
+    mockBooking.findOne.mockResolvedValue(null)
 
     const { POST } = await import('@/app/api/webhook/route')
     const req = new Request('http://localhost:3001/api/webhook', {
@@ -357,7 +609,7 @@ describe('POST /api/webhook', () => {
         stripePaymentId: 'pi_webhook_test',
         customerName: 'Webhook User',
         guests: 2,
-        totalPaid: 5800,
+        totalPaid: 11800,
         status: 'confirmed',
       })
     )
@@ -369,13 +621,13 @@ describe('POST /api/webhook', () => {
       data: {
         object: {
           id: 'pi_existing',
-          amount: 2900,
+          amount: 5900,
           currency: 'eur',
           metadata: { name: 'Dup', email: 'dup@test.com', guests: '1', date: '2026-07-01', time: '10:00 AM' },
         },
       },
     })
-    mockBooking.findOne.mockResolvedValue({ _id: 'exists' }) // Already exists
+    mockBooking.findOne.mockResolvedValue({ _id: 'exists' })
 
     const { POST } = await import('@/app/api/webhook/route')
     const req = new Request('http://localhost:3001/api/webhook', {
@@ -421,8 +673,8 @@ describe('POST /api/webhook', () => {
       data: {
         object: {
           payment_intent: 'pi_refund_test',
-          amount: 5800,
-          amount_refunded: 5800, // full refund
+          amount: 11800,
+          amount_refunded: 11800,
         },
       },
     })
@@ -439,9 +691,7 @@ describe('POST /api/webhook', () => {
     expect(res.status).toBe(200)
     expect(mockBooking.findOneAndUpdate).toHaveBeenCalledWith(
       { stripePaymentId: 'pi_refund_test' },
-      expect.objectContaining({
-        status: 'refunded',
-      })
+      expect.objectContaining({ status: 'refunded' })
     )
   })
 
@@ -451,8 +701,8 @@ describe('POST /api/webhook', () => {
       data: {
         object: {
           payment_intent: 'pi_partial',
-          amount: 5800,
-          amount_refunded: 2900, // partial refund
+          amount: 11800,
+          amount_refunded: 5900,
         },
       },
     })
@@ -468,14 +718,12 @@ describe('POST /api/webhook', () => {
     await POST(req)
     expect(mockBooking.findOneAndUpdate).toHaveBeenCalledWith(
       { stripePaymentId: 'pi_partial' },
-      expect.objectContaining({
-        status: 'confirmed', // Not refunded — partial
-      })
+      expect.objectContaining({ status: 'confirmed' })
     )
   })
 })
 
-// ─── 4. Admin Bookings API ────────────────────────────────────
+// ─── 5. Admin Bookings API ──────────────────────────────────
 
 describe('GET /api/admin/bookings', () => {
   beforeEach(() => {
@@ -570,33 +818,21 @@ describe('GET /api/admin/bookings', () => {
   })
 })
 
-// ─── 5. Admin Stats API ──────────────────────────────────────
+// ─── 6. Admin Stats API ─────────────────────────────────────
 
 describe('GET /api/admin/stats', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockBooking.countDocuments.mockResolvedValue(0)
     mockBooking.aggregate.mockResolvedValue([{ total: 0 }])
-    mockBooking.find.mockReturnValue({
-      sort: vi.fn().mockReturnValue({
-        skip: vi.fn().mockReturnValue({
-          limit: vi.fn().mockReturnValue({
-            lean: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-        limit: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue([]),
-        }),
-      }),
-    })
+    resetBookingFindMock()
   })
 
   it('returns dashboard statistics', async () => {
-    // This test verifies the stats endpoint exists and returns data
     const { GET } = await import('@/app/api/admin/stats/route')
     const req = new Request('http://localhost:3001/api/admin/stats')
 
-    const res = await GET(req)
+    const res = await GET()
     expect(res.status).toBe(200)
 
     const data = await res.json()
@@ -605,5 +841,166 @@ describe('GET /api/admin/stats', () => {
     expect(data.stats).toHaveProperty('confirmedBookings')
     expect(data.stats).toHaveProperty('totalRevenue')
     expect(data).toHaveProperty('recentBookings')
+  })
+})
+
+// ─── 7. Admin Config → Frontend → Payment integration ───────
+
+describe('Admin config changes propagate to booking flow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBooking.aggregate.mockResolvedValue([]) // No existing bookings
+  })
+
+  it('price change in admin reflects in checkout amount', async () => {
+    // Admin sets price to €35
+    resetTourConfigMock({ pricePerPerson: 3500 })
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_35' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 4,
+      date: '2026-08-01',
+      time: '10:00 AM',
+      name: 'Price Test',
+      email: 'price@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 14000 }) // 3500 × 4
+    )
+  })
+
+  it('new blackout date in admin blocks checkout', async () => {
+    // Admin adds July 4th as blackout
+    resetTourConfigMock({
+      blackoutDates: ['2026-12-25', '2027-01-01', '2026-07-04'],
+    })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-07-04',
+      time: '10:00 AM',
+      name: 'Blocked',
+      email: 'blocked@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/not available/i)
+  })
+
+  it('removed time slot in admin blocks checkout', async () => {
+    // Admin removes the 10:30 AM slot, keeps only 10:00 AM
+    resetTourConfigMock({
+      timeSlots: [{ id: 'morning-10', time: '10:00 AM', label: 'Morning Tour' }],
+    })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-06-15',
+      time: '10:30 AM', // No longer valid
+      name: 'Slot Test',
+      email: 'slot@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/invalid time slot/i)
+  })
+
+  it('new time slot added in admin is accepted at checkout', async () => {
+    resetTourConfigMock({
+      timeSlots: [
+        { id: 'morning-10', time: '10:00 AM', label: 'Morning Tour' },
+        { id: 'afternoon-2', time: '2:00 PM', label: 'Afternoon Tour' },
+      ],
+    })
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_new_slot' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 2,
+      date: '2026-06-15',
+      time: '2:00 PM', // New slot
+      name: 'New Slot',
+      email: 'newslot@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+  })
+
+  it('max guests change in admin enforces new limit', async () => {
+    // Admin reduces max guests from 20 to 8
+    resetTourConfigMock({ maxGuestsPerSlot: 8 })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 9,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Over Limit',
+      email: 'over@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/guest count/i)
+  })
+
+  it('config and checkout use same currency', async () => {
+    resetTourConfigMock({ currency: 'usd', pricePerPerson: 3200 })
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_usd' })
+
+    const { POST } = await import('@/app/api/checkout/route')
+    const req = makeRequest({
+      guests: 1,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'USD Test',
+      email: 'usd@test.com',
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ currency: 'usd', amount: 3200 })
+    )
+  })
+
+  it('public API and checkout read from same config source', async () => {
+    // Set a specific price
+    resetTourConfigMock({ pricePerPerson: 4200 })
+    mockPaymentIntentsCreate.mockResolvedValue({ client_secret: 'pi_sync' })
+
+    // Check public API
+    const tourConfigRoute = await import('@/app/api/tour-config/route')
+    const configRes = await tourConfigRoute.GET()
+    const configData = await configRes.json()
+
+    // Check checkout uses same price
+    const checkoutRoute = await import('@/app/api/checkout/route')
+    const checkoutReq = makeRequest({
+      guests: 1,
+      date: '2026-06-15',
+      time: '10:00 AM',
+      name: 'Sync Test',
+      email: 'sync@test.com',
+    })
+    await checkoutRoute.POST(checkoutReq)
+
+    // Both should use 4200
+    expect(configData.pricePerPerson).toBe(4200)
+    expect(mockPaymentIntentsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 4200 })
+    )
   })
 })

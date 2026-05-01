@@ -16,6 +16,7 @@ import { Section, Button } from '@/components/ui'
 import { BookingWidget } from '@/components/booking'
 import { siteConfig } from '@/config/site'
 import { bookContent } from '@/content/en/book'
+import { getActiveTourConfig } from '@/lib/tour-config'
 
 export const metadata: Metadata = {
   title: 'Book Sachsenhausen Tour Berlin — Concentration Camp Tickets & Availability',
@@ -38,8 +39,23 @@ const iconMap = {
   train: Train,
 }
 
-export default function BookPage() {
+export default async function BookPage() {
   const { hero, highlights, description, itinerary, siteHighlights, whatToBring, bookingCta, contact, bookingWidget } = bookContent
+
+  // Fetch dynamic config from DB (falls back to static defaults)
+  const tourConfig = await getActiveTourConfig()
+
+  // Convert DB price (cents) to euros for the widget
+  const dynamicPrice = Math.round(tourConfig.pricePerPerson / 100)
+
+  // Use DB values, falling back to static content
+  const dynamicSlots = tourConfig.timeSlots.length > 0
+    ? tourConfig.timeSlots.map(s => ({ ...s, available: true }))
+    : bookingWidget.slots
+  const dynamicBlackoutDates = tourConfig.blackoutDates.length > 0
+    ? tourConfig.blackoutDates
+    : bookingWidget.blackoutDates
+  const dynamicMinAdvanceDays = tourConfig.minAdvanceDays || bookingWidget.minAdvanceDays
   const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?text=${encodeURIComponent("Hi! I'd like to book the Sachsenhausen Tour.")}`
 
   return (
@@ -166,10 +182,11 @@ export default function BookPage() {
           <p className="mt-3 text-text-muted">{bookingCta.subheading}</p>
         </div>
         <BookingWidget
-          price={siteConfig.booking.price}
-          defaultSlots={bookingWidget.slots}
-          blackoutDates={bookingWidget.blackoutDates}
-          minAdvanceDays={bookingWidget.minAdvanceDays}
+          price={dynamicPrice}
+          defaultSlots={dynamicSlots}
+          blackoutDates={dynamicBlackoutDates}
+          minAdvanceDays={dynamicMinAdvanceDays}
+          maxGuests={tourConfig.maxGuestsPerSlot}
           checkoutUrl={bookingCta.buttonHref}
           reassurance={bookingCta.reassurance}
         />

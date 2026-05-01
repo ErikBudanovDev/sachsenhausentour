@@ -31,6 +31,8 @@ export interface BookingWidgetProps extends WithClassName {
   blackoutDates?: string[]
   /** Min days in advance for booking */
   minAdvanceDays?: number
+  /** Max guests per time slot */
+  maxGuests?: number
   /** WooCommerce checkout URL (legacy, kept for WhatsApp fallback) */
   checkoutUrl: string
   /** Free cancellation text */
@@ -44,6 +46,7 @@ export function BookingWidget({
   defaultSlots,
   blackoutDates = [],
   minAdvanceDays = 1,
+  maxGuests = 20,
   checkoutUrl,
   reassurance,
   className,
@@ -261,7 +264,7 @@ export function BookingWidget({
                 {guests}
               </span>
               <button
-                onClick={() => setGuests((g) => Math.min(20, g + 1))}
+                onClick={() => setGuests((g) => Math.min(maxGuests, g + 1))}
                 className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-lg font-bold text-text transition-colors hover:border-accent"
               >
                 +
