@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer'
 import Stripe from 'stripe'
 import { getStripeSecretKey } from '@/lib/stripe'
 import { connectDB } from '@/lib/mongodb'
-import { Booking } from '@/models/Booking'
+import { Booking, generateBookingRef } from '@/models/Booking'
 
 const stripe = new Stripe(getStripeSecretKey(), {
   apiVersion: '2026-04-22.dahlia',
@@ -24,6 +24,7 @@ function esc(s: string) {
 }
 
 function buildCustomerEmail(booking: {
+  bookingRef: string
   name: string
   date: string
   time: string
@@ -48,6 +49,12 @@ function buildCustomerEmail(booking: {
       <p style="margin:0 0 24px;color:#555555;font-size:14px;line-height:1.6;">
         Thank you for booking the Sachsenhausen Memorial Tour. Here are your booking details:
       </p>
+
+      <!-- Reference number -->
+      <div style="background:#0F8B6E;border-radius:6px;padding:16px;margin-bottom:16px;text-align:center;">
+        <p style="margin:0 0 4px;color:rgba(255,255,255,0.8);font-size:11px;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
+        <p style="margin:0;color:#FFFFFF;font-size:20px;font-weight:bold;letter-spacing:2px;">${booking.bookingRef}</p>
+      </div>
 
       <!-- Details card -->
       <div style="background:#F7F7F5;border-radius:6px;padding:20px;margin-bottom:24px;">
@@ -107,6 +114,7 @@ function buildCustomerEmail(booking: {
 }
 
 function buildInternalEmail(booking: {
+  bookingRef: string
   name: string
   email: string
   phone: string
@@ -117,6 +125,8 @@ function buildInternalEmail(booking: {
   paymentId: string
 }) {
   return `New booking received!
+
+Booking Ref: ${booking.bookingRef}
 
 Tour: Sachsenhausen Memorial Tour
 Date: ${booking.date}
@@ -180,29 +190,34 @@ export async function POST(request: Request) {
     }
 
     // Save booking to MongoDB (idempotent)
+    let bookingRef: string
     try {
       await connectDB()
-      await Booking.findOneAndUpdate(
-        { stripePaymentId: paymentId },
-        {
-          $setOnInsert: {
-            stripePaymentId: paymentId,
-            customerName: name,
-            customerEmail: email.toLowerCase(),
-            customerPhone: phone || undefined,
-            tourDate: date,
-            tourTime: time,
-            guests,
-            pricePerPerson: Math.round(totalCents / guests),
-            totalPaid: totalCents,
-            currency,
-            status: 'confirmed',
-          },
-        },
-        { upsert: true, new: true }
-      )
+
+      // Check if booking already exists (idempotent)
+      const existing = await Booking.findOne({ stripePaymentId: paymentId }).lean()
+      if (existing) {
+        bookingRef = (existing as { bookingRef?: string }).bookingRef || generateBookingRef()
+      } else {
+        bookingRef = generateBookingRef()
+        await Booking.create({
+          bookingRef,
+          stripePaymentId: paymentId,
+          customerName: name,
+          customerEmail: email.toLowerCase(),
+          customerPhone: phone || undefined,
+          tourDate: date,
+          tourTime: time,
+          guests,
+          pricePerPerson: Math.round(totalCents / guests),
+          totalPaid: totalCents,
+          currency,
+          status: 'confirmed',
+        })
+      }
     } catch (dbErr) {
       console.error('DB save error (non-fatal):', dbErr)
+      bookingRef = generateBookingRef() // still generate for emails
     }
 
     const totalDisplay = `€${(totalCents / 100).toFixed(2)}`
@@ -211,19 +226,19 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: `"Sachsenhausen Tour" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: `Booking Confirmed — Sachsenhausen Tour on ${esc(date)}`,
-      html: buildCustomerEmail({ name: esc(name), date: esc(date), time: esc(time), guests, total: totalDisplay }),
+      subject: `Booking ${bookingRef} Confirmed — Sachsenhausen Tour on ${esc(date)}`,
+      html: buildCustomerEmail({ bookingRef, name: esc(name), date: esc(date), time: esc(time), guests, total: totalDisplay }),
     })
 
-    // Send internal notification
+    // Send admin notification
     await transporter.sendMail({
       from: `"Booking System" <${process.env.SMTP_USER}>`,
-      to: 'service@beoriginaltours.com',
-      subject: `New Booking: ${name} — ${guests} guests on ${date}`,
-      text: buildInternalEmail({ name, email, phone, date, time, guests, total: totalDisplay, paymentId }),
+      to: 'booking@original-europe-tours.com',
+      subject: `[${bookingRef}] New Booking: ${esc(name)} — ${guests} guests on ${esc(date)}`,
+      text: buildInternalEmail({ bookingRef, name, email, phone, date, time, guests, total: totalDisplay, paymentId }),
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, bookingRef })
   } catch (err) {
     console.error('Confirm error:', err)
     return NextResponse.json({ success: false, error: 'Confirmation failed' })

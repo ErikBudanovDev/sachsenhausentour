@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
-import { CheckCircle, CalendarDays, Users, MapPin, Clock, Mail } from 'lucide-react'
+import { CheckCircle, CalendarDays, Users, MapPin, Clock, Mail, Hash } from 'lucide-react'
 import { Section, Button } from '@/components/ui'
 import { siteConfig } from '@/config/site'
 
@@ -13,6 +13,7 @@ function ConfirmationContent() {
   const time = params.get('time') || ''
   const guests = params.get('guests') || '1'
   const total = params.get('total') || '29'
+  const bookingRef = params.get('ref') || ''
 
   return (
     <Section spacing="xl">
@@ -27,6 +28,15 @@ function ConfirmationContent() {
           Thank you, {name}. Your Sachsenhausen Memorial Tour is booked.
           A confirmation email has been sent to your inbox.
         </p>
+
+        {/* Booking reference badge */}
+        {bookingRef && (
+          <div className="mt-6 inline-flex items-center gap-2 rounded-md bg-accent/10 px-4 py-2.5">
+            <Hash className="h-4 w-4 text-accent" />
+            <span className="text-xs text-text-muted">Booking Reference</span>
+            <span className="font-heading text-lg font-bold tracking-wider text-accent">{bookingRef}</span>
+          </div>
+        )}
 
         {/* Booking details card */}
         <div className="mt-8 rounded-md border border-border bg-surface p-6 text-left">

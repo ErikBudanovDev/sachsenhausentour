@@ -63,10 +63,11 @@ export function CheckoutForm({
       return
     }
 
-    // Payment succeeded — send confirmation email
+    // Payment succeeded — send confirmation email and get booking reference
     if (paymentIntent && paymentIntent.status === 'succeeded') {
+      let bookingRef = ''
       try {
-        await fetch('/api/checkout/confirm', {
+        const res = await fetch('/api/checkout/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -80,17 +81,20 @@ export function CheckoutForm({
             paymentId: paymentIntent.id,
           }),
         })
+        const data = await res.json()
+        bookingRef = data.bookingRef || ''
       } catch {
         // Email failure shouldn't block the user
       }
 
-      // Redirect to confirmation page
+      // Redirect to confirmation page with booking reference
       const params = new URLSearchParams({
         name,
         date,
         time,
         guests: String(guests),
         total: String(total),
+        ...(bookingRef ? { ref: bookingRef } : {}),
       })
       router.push(`/book/confirmation?${params.toString()}`)
     }

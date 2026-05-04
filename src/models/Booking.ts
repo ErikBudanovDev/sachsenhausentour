@@ -1,6 +1,9 @@
 import mongoose, { Schema, type Document } from 'mongoose'
+import crypto from 'crypto'
 
 export interface IBooking extends Document {
+  /** Human-readable booking reference, e.g. BOT-20260504-A3K7 */
+  bookingRef: string
   /** Stripe PaymentIntent ID */
   stripePaymentId: string
   /** Customer details */
@@ -25,8 +28,27 @@ export interface IBooking extends Document {
   updatedAt: Date
 }
 
+/**
+ * Generate a human-readable booking reference.
+ * Format: BOT-YYYYMMDD-XXXX (e.g. BOT-20260504-A3K7)
+ */
+export function generateBookingRef(): string {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no 0/O/1/I to avoid confusion
+  let suffix = ''
+  const bytes = crypto.randomBytes(4)
+  for (let i = 0; i < 4; i++) {
+    suffix += chars[bytes[i] % chars.length]
+  }
+  return `BOT-${y}${m}${d}-${suffix}`
+}
+
 const BookingSchema = new Schema<IBooking>(
   {
+    bookingRef: { type: String, required: true, unique: true },
     stripePaymentId: { type: String, required: true, unique: true },
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true, lowercase: true },
