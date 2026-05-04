@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   Type,
   RotateCcw,
+  Upload,
 } from 'lucide-react'
 
 type SectionData = Record<string, unknown>
@@ -234,7 +235,17 @@ function FieldEditor({
             <ImageIcon className="h-3 w-3" /> Image URL
           </div>
         )}
-        {isLong ? (
+        {isImage ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#0F8B6E] focus:outline-none focus:ring-1 focus:ring-[#0F8B6E]"
+            />
+            <ImageUploadButton onUploaded={(url) => onChange(url)} />
+          </div>
+        ) : isLong ? (
           <textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -429,6 +440,75 @@ function ArrayEditor({
       >
         <Plus className="h-3 w-3" /> Add item
       </button>
+    </div>
+  )
+}
+
+/* ─── Image Upload Button ─── */
+
+function ImageUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    setError('')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Upload failed')
+        return
+      }
+
+      onUploaded(data.url)
+    } catch {
+      setError('Upload failed')
+    } finally {
+      setUploading(false)
+      // Reset the input so the same file can be re-uploaded
+      e.target.value = ''
+    }
+  }
+
+  return (
+    <div className="relative">
+      <label
+        className={`flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium transition ${
+          uploading
+            ? 'bg-gray-50 text-gray-400 cursor-wait'
+            : 'bg-white text-gray-600 hover:border-[#0F8B6E] hover:text-[#0F8B6E]'
+        }`}
+      >
+        {uploading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Upload className="h-4 w-4" />
+        )}
+        {uploading ? 'Uploading…' : 'Upload'}
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,video/mp4"
+          onChange={handleUpload}
+          disabled={uploading}
+          className="sr-only"
+        />
+      </label>
+      {error && (
+        <p className="mt-1 text-xs text-red-500">{error}</p>
+      )}
     </div>
   )
 }
