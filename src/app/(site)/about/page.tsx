@@ -1,8 +1,11 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ExternalLink, Award, BookOpen, Heart, GraduationCap, Globe } from 'lucide-react'
 import { Section, Button, Card } from '@/components/ui'
-import { teamMembers, companyHistory, achievements } from '@/content/en/team'
+import { teamMembers as staticTeam, companyHistory as staticHistory, achievements as staticAchievements } from '@/content/en/team'
+import { getPageContent } from '@/lib/page-content'
 import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
@@ -74,7 +77,7 @@ function OrganizationSchema() {
       siteConfig.social.facebook,
       siteConfig.social.instagram,
     ],
-    employee: teamMembers.map((m) => ({
+    employee: staticTeam.map((m) => ({
       '@type': 'Person',
       name: m.name,
       jobTitle: m.role,
@@ -92,7 +95,13 @@ function OrganizationSchema() {
   )
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { sections: p } = await getPageContent('about')
+  const hero = p.hero as { title?: string; subtitle?: string } | undefined
+  const teamMembers = (p.team as typeof staticTeam) || staticTeam
+  const companyHistory = (p.history as typeof staticHistory) || staticHistory
+  const achievements = (p.achievements as typeof staticAchievements) || staticAchievements
+
   return (
     <>
       {/* Hero */}
@@ -106,9 +115,9 @@ export default function AboutPage() {
         />
         <div className="absolute inset-0 bg-navy/75" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">About Sachsenhausen Tour</h1>
+          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">{hero?.title || 'About Sachsenhausen Tour'}</h1>
           <p className="mt-4 text-lg text-white/90 max-w-2xl mx-auto">
-            Berlin-based historians dedicated to preserving memory through education since 2015.
+            {hero?.subtitle || 'Berlin-based historians dedicated to preserving memory through education since 2015.'}
           </p>
         </div>
       </section>

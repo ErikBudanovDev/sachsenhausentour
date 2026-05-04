@@ -1,6 +1,9 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Section } from '@/components/ui'
+import { getPageContent } from '@/lib/page-content'
 
 export const metadata: Metadata = {
   title: 'Sachsenhausen Camp Berlin — Tour Photos & Memorial Gallery',
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
   },
 }
 
-const galleryImages = [
+const defaultGalleryImages = [
   { src: '/images/gallery/DSCF5931-min-scaled.jpg', alt: 'Sachsenhausen Memorial entrance and grounds', caption: 'The memorial grounds — a place of remembrance and reflection.' },
   { src: '/images/gallery/DSCF5936-min-scaled.jpg', alt: 'Historical structures at the memorial site', caption: 'Preserved structures that bear witness to the camp\'s history.' },
   { src: '/images/gallery/DSCF5939-min-scaled.jpg', alt: 'Memorial pathway through the camp', caption: 'Walking the paths once walked by thousands of prisoners.' },
@@ -28,14 +31,18 @@ const galleryImages = [
   { src: '/images/gallery/DSCF6098-scaled.jpg', alt: 'Guided tour group at Sachsenhausen', caption: 'Our guides provide context that transforms a visit into understanding.' },
 ]
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const { sections: p } = await getPageContent('gallery')
+  const hero = p.hero as { title?: string; subtitle?: string } | undefined
+  const galleryImages = (p.images as typeof defaultGalleryImages) || defaultGalleryImages
+
   return (
     <>
       <Section spacing="xl" className="pt-32">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="font-heading text-4xl font-bold sm:text-5xl">Gallery</h1>
+          <h1 className="font-heading text-4xl font-bold sm:text-5xl">{hero?.title || 'Gallery'}</h1>
           <p className="mt-4 font-accent text-lg italic text-text-muted">
-            These are not just places — they are stories.
+            {hero?.subtitle || 'These are not just places — they are stories.'}
           </p>
         </div>
       </Section>

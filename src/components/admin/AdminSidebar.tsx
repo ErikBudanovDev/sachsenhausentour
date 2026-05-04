@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Settings,
   Users,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -17,6 +18,7 @@ import { useState } from 'react'
 const navItems = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
+  { href: '/admin/pages', label: 'Pages', icon: FileText },
   { href: '/admin/tours', label: 'Tour Config', icon: Settings },
   { href: '/admin/users', label: 'Users', icon: Users },
 ]

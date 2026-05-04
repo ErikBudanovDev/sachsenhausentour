@@ -17,7 +17,8 @@ import {
 import { Section, Button } from '@/components/ui'
 import { BookingWidget } from '@/components/booking'
 import { siteConfig } from '@/config/site'
-import { bookContent } from '@/content/en/book'
+import { bookContent as staticBookContent } from '@/content/en/book'
+import { getPageContent } from '@/lib/page-content'
 import { getActiveTourConfig } from '@/lib/tour-config'
 import { formatPrice } from '@/lib/format-price'
 
@@ -43,7 +44,9 @@ const iconMap = {
 }
 
 export default async function BookPage() {
-  const { hero, highlights, description, itinerary, siteHighlights, whatToBring, bookingCta, contact, bookingWidget } = bookContent
+  const { sections } = await getPageContent('book')
+  const bc = sections as unknown as typeof staticBookContent
+  const { hero, highlights, description, itinerary, siteHighlights, whatToBring, bookingCta, contact, bookingWidget } = bc
 
   // Fetch dynamic config from DB (falls back to static defaults)
   const tourConfig = await getActiveTourConfig()

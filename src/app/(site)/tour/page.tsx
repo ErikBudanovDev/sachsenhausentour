@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Section, Accordion, Button } from '@/components/ui'
 import { getActiveTourConfig } from '@/lib/tour-config'
+import { getPageContent } from '@/lib/page-content'
 import { formatPrice } from '@/lib/format-price'
 
 export const metadata: Metadata = {
@@ -20,13 +21,15 @@ export const metadata: Metadata = {
 
 export default async function TourPage() {
   const config = await getActiveTourConfig()
+  const { sections: p } = await getPageContent('tour')
+  const hero = p.hero as { title?: string; subtitle?: string; backgroundImage?: string } | undefined
 
   return (
     <>
       {/* Hero */}
       <section className="relative flex min-h-[60vh] items-center justify-center overflow-hidden">
         <Image
-          src="/images/gallery/DSCF5939-min-scaled.jpg"
+          src={hero?.backgroundImage || '/images/gallery/DSCF5939-min-scaled.jpg'}
           alt="Sachsenhausen concentration camp memorial tour — pathway through the memorial grounds"
           fill
           className="object-cover"
@@ -34,9 +37,9 @@ export default async function TourPage() {
         />
         <div className="absolute inset-0 bg-navy/65" />
         <div className="relative z-10 text-center px-4">
-          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">Sachsenhausen Concentration Camp Memorial Tour</h1>
+          <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl">{hero?.title || 'Sachsenhausen Concentration Camp Memorial Tour'}</h1>
           <p className="mt-4 text-lg text-white/70">
-            A full-day guided tour of the Sachsenhausen concentration camp from Berlin
+            {hero?.subtitle || 'A full-day guided tour of the Sachsenhausen concentration camp from Berlin'}
           </p>
         </div>
       </section>

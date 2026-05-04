@@ -16,7 +16,8 @@ import {
   Sparkles,
   MessageCircle,
 } from 'lucide-react'
-import { homeContent } from '@/content/en/home'
+import type { HomeContent } from '@/content/types'
+import { getPageContent } from '@/lib/page-content'
 import { Section, Button, Card, Accordion } from '@/components/ui'
 import { FAQSchema } from '@/components/seo/FAQSchema'
 import { TourSchema } from '@/components/seo/TourSchema'
@@ -72,7 +73,8 @@ const whatsappHref = `https://wa.me/${siteConfig.whatsapp.replace(/\+/g, '')}?te
 
 export default async function HomePage() {
   const config = await getActiveTourConfig()
-  const c = homeContent
+  const { sections } = await getPageContent('home')
+  const c = sections as unknown as HomeContent
 
   return (
     <>
