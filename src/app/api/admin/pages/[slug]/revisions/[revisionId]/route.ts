@@ -5,69 +5,67 @@ import { PageContent } from '@/models/PageContent'
 import { PageRevision } from '@/models/PageRevision'
 import { getStaticDefaults, PAGE_SLUGS } from '@/lib/page-content'
 
-/** GET — get page content (DB + static defaults merged) */
+/** GET — get full revision content */
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string; revisionId: string }> }
 ) {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { slug } = await params
-  const defaults = getStaticDefaults(slug)
-  if (!defaults) {
-    return NextResponse.json({ error: 'Unknown page' }, { status: 404 })
-  }
+  const { slug, revisionId } = await params
 
   await connectDB()
-  const doc = await PageContent.findOne({ slug }).lean()
+  const revision = await PageRevision.findById(revisionId).lean()
 
-  return NextResponse.json({
-    slug,
-    title: (doc as { title?: string })?.title || defaults.title,
-    sections: (doc as { sections?: Record<string, unknown> })?.sections || defaults.sections,
-    defaults: defaults.sections,
-    seo: (doc as { seo?: Record<string, string> })?.seo || {},
-    hasCustomContent: !!doc,
-  })
+  if (!revision || (revision as { slug: string }).slug !== slug) {
+    return NextResponse.json({ error: 'Revision not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ revision })
 }
 
-/** PUT — save page content (admin only) */
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+/** POST — restore this revision (saves current as a new revision first) */
+export async function POST(
+  _request: Request,
+  { params }: { params: Promise<{ slug: string; revisionId: string }> }
 ) {
   const session = await auth()
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { slug } = await params
+  const { slug, revisionId } = await params
   if (!PAGE_SLUGS.includes(slug as typeof PAGE_SLUGS[number])) {
     return NextResponse.json({ error: 'Unknown page' }, { status: 404 })
   }
 
-  const body = await request.json()
-  const { title, sections, seo } = body
-
-  if (!sections || typeof sections !== 'object') {
-    return NextResponse.json({ error: 'sections is required' }, { status: 400 })
-  }
-
-  const defaults = getStaticDefaults(slug)
-  const editorEmail = (session.user as { email?: string }).email || 'admin'
-
   await connectDB()
 
-  // Save current version as a revision before overwriting
+  // Find the revision to restore
+  const revision = await PageRevision.findById(revisionId).lean() as {
+    slug: string
+    sections: Record<string, unknown>
+    seo?: Record<string, string>
+  } | null
+
+  if (!revision || revision.slug !== slug) {
+    return NextResponse.json({ error: 'Revision not found' }, { status: 404 })
+  }
+
+  const editorEmail = (session.user as { email?: string }).email || 'admin'
+  const defaults = getStaticDefaults(slug)
+
+  // Save current version as a revision before restoring
   const existing = await PageContent.findOne({ slug }).lean() as {
     sections?: Record<string, unknown>
     seo?: Record<string, string>
     updatedBy?: string
     updatedAt?: Date
   } | null
+
   if (existing?.sections) {
     await PageRevision.create({
       slug,
@@ -78,19 +76,20 @@ export async function PUT(
     })
   }
 
+  // Restore the revision
   const doc = await PageContent.findOneAndUpdate(
     { slug },
     {
       $set: {
         slug,
-        title: title || defaults?.title || slug,
-        sections,
-        seo: seo || {},
+        title: defaults?.title || slug,
+        sections: revision.sections,
+        seo: revision.seo || {},
         updatedBy: editorEmail,
       },
     },
     { upsert: true, new: true, runValidators: true }
   ).lean()
 
-  return NextResponse.json({ page: doc })
+  return NextResponse.json({ page: doc, restored: true })
 }

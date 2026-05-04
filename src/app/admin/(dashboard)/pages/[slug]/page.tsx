@@ -14,9 +14,19 @@ import {
   Type,
   RotateCcw,
   Upload,
+  History,
+  X,
+  Clock,
+  Undo2,
 } from 'lucide-react'
 
 type SectionData = Record<string, unknown>
+
+interface Revision {
+  _id: string
+  savedBy: string
+  savedAt: string
+}
 
 export default function PageEditorPage() {
   const params = useParams()
@@ -31,6 +41,10 @@ export default function PageEditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+  const [showHistory, setShowHistory] = useState(false)
+  const [revisions, setRevisions] = useState<Revision[]>([])
+  const [loadingRevisions, setLoadingRevisions] = useState(false)
+  const [restoringId, setRestoringId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/admin/pages/${slug}`)
@@ -64,6 +78,50 @@ export default function PageEditorPage() {
       setSaving(false)
     }
   }, [slug, title, sections, seo])
+
+  const loadRevisions = useCallback(async () => {
+    setLoadingRevisions(true)
+    try {
+      const res = await fetch(`/api/admin/pages/${slug}/revisions`)
+      const data = await res.json()
+      setRevisions(data.revisions || [])
+    } catch {
+      setRevisions([])
+    } finally {
+      setLoadingRevisions(false)
+    }
+  }, [slug])
+
+  const handleOpenHistory = useCallback(() => {
+    setShowHistory(true)
+    loadRevisions()
+  }, [loadRevisions])
+
+  const handleRestore = useCallback(async (revisionId: string) => {
+    if (!confirm('Restore this version? Your current content will be saved as a revision first.')) return
+    setRestoringId(revisionId)
+    try {
+      const res = await fetch(`/api/admin/pages/${slug}/revisions/${revisionId}`, {
+        method: 'POST',
+      })
+      if (res.ok) {
+        // Reload the page content
+        const pageRes = await fetch(`/api/admin/pages/${slug}`)
+        const data = await pageRes.json()
+        setSections(data.sections || {})
+        setSeo(data.seo || {})
+        setShowHistory(false)
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+        // Refresh revision list
+        loadRevisions()
+      }
+    } catch (err) {
+      console.error('Restore error:', err)
+    } finally {
+      setRestoringId(null)
+    }
+  }, [slug, loadRevisions])
 
   const toggleSection = (key: string) => {
     setCollapsedSections((prev) => {
@@ -106,15 +164,96 @@ export default function PageEditorPage() {
             <p className="text-xs text-gray-400">/{slug === 'home' ? '' : slug}</p>
           </div>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-[#0F8B6E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0d7a60] disabled:opacity-60"
-        >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save Changes'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleOpenHistory}
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+          >
+            <History className="h-4 w-4" />
+            History
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 rounded-lg bg-[#0F8B6E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0d7a60] disabled:opacity-60"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save Changes'}
+          </button>
+        </div>
       </div>
+
+      {/* Revision History Panel */}
+      {showHistory && (
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white">
+          <div className="flex items-center justify-between border-b border-gray-100 p-4">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-gray-500" />
+              <h2 className="text-sm font-semibold text-gray-700">Revision History</h2>
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                Last 90 days
+              </span>
+            </div>
+            <button
+              onClick={() => setShowHistory(false)}
+              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="max-h-80 overflow-y-auto">
+            {loadingRevisions ? (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              </div>
+            ) : revisions.length === 0 ? (
+              <div className="p-8 text-center text-sm text-gray-400">
+                No revisions yet. Revisions are created each time you save changes.
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {revisions.map((rev) => (
+                  <div
+                    key={rev._id}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          {new Date(rev.savedAt).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}{' '}
+                          at{' '}
+                          {new Date(rev.savedAt).toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        <p className="text-xs text-gray-400">by {rev.savedBy}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRestore(rev._id)}
+                      disabled={restoringId === rev._id}
+                      className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:border-[#0F8B6E] hover:text-[#0F8B6E] disabled:opacity-50"
+                    >
+                      {restoringId === rev._id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Undo2 className="h-3 w-3" />
+                      )}
+                      Restore
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* SEO Section */}
       <div className="mb-6 rounded-xl border border-gray-200 bg-white">
