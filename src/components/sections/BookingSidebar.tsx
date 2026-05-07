@@ -238,7 +238,7 @@ export function BookingSidebar({
         {/* Rating summary */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-            <span className="font-heading text-lg font-bold text-accent">4.8</span>
+            <span className="font-heading text-lg font-bold text-accent">4.9</span>
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -249,7 +249,7 @@ export function BookingSidebar({
               </div>
               <GoogleIcon className="h-4 w-4 ml-1" />
             </div>
-            <p className="text-xs text-text-muted mt-0.5">Based on 320+ verified reviews</p>
+            <p className="text-xs text-text-muted mt-0.5">Based on 10,000+ verified reviews</p>
           </div>
         </div>
 

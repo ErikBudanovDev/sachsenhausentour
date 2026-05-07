@@ -114,8 +114,8 @@ export default async function HomePage() {
               <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:justify-start">
                 <div className="flex items-center gap-1.5">
                   <Star className="h-4 w-4 fill-[#FBBC05] text-[#FBBC05]" />
-                  <span className="text-sm font-bold text-white">4.8/5</span>
-                  <span className="text-sm text-white/60">(320+ reviews)</span>
+                  <span className="text-sm font-bold text-white">4.9/5</span>
+                  <span className="text-sm text-white/60">(10,000+ reviews)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-white/60" />
@@ -238,10 +238,10 @@ export default async function HomePage() {
         heading="What Our Visitors Say"
         subheading="Verified reviews from guests on Google and Tripadvisor."
         reviews={reviewsData as Review[]}
-        avgRating="4.7"
-        totalReviews="4,363"
-        googleCount="1,667"
-        tripadvisorCount="2,696"
+        avgRating="4.9"
+        totalReviews="10,000+"
+        googleCount="3,500+"
+        tripadvisorCount="6,500+"
       />
 
       {/* ═══════════════ 2. OVERVIEW / HIGHLIGHTS ═══════════════ */}

@@ -233,7 +233,7 @@ export async function POST(request: Request) {
     // Send admin notification
     await transporter.sendMail({
       from: `"Booking System" <${process.env.SMTP_USER}>`,
-      to: 'booking@original-europe-tours.com',
+      to: 'service@beoriginaltours.com',
       subject: `[${bookingRef}] New Booking: ${esc(name)} — ${guests} guests on ${esc(date)}`,
       text: buildInternalEmail({ bookingRef, name, email, phone, date, time, guests, total: totalDisplay, paymentId }),
     })

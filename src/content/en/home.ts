@@ -18,8 +18,8 @@ export const homeContent: HomeContent = {
 
   /* ─── 2. Tour Highlights (Snapshot strip) ─── */
   trustBar: {
-    rating: '4.8',
-    reviewCount: '320+',
+    rating: '4.9',
+    reviewCount: '10,000+',
     since: '2015',
     platforms: ['Google', 'TripAdvisor'],
     snapshots: [
@@ -34,7 +34,7 @@ export const homeContent: HomeContent = {
     heading: 'Trusted Sachsenhausen Tours Berlin',
     subheading: 'Numbers that reflect our commitment to quality and education.',
     stats: [
-      { value: '4.8★', label: 'Average Rating' },
+      { value: '4.9★', label: 'Average Rating' },
       { value: '15,000+', label: 'Visitors Guided' },
       { value: '10+', label: 'Years of Experience' },
       { value: '100%', label: 'Berlin-Based Guides' },

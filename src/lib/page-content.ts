@@ -123,7 +123,7 @@ const STATIC_DEFAULTS: Record<string, { title: string; sections: Record<string, 
         subtitle: 'Have questions about our Sachsenhausen tour? Get in touch.',
       },
       info: {
-        email: 'booking@original-europe-tours.com',
+        email: 'service@beoriginaltours.com',
         whatsapp: '+49 157 83893416',
         address: 'Berlin, Germany',
       },

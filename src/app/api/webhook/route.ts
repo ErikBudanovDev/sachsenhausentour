@@ -63,7 +63,7 @@ async function sendBookingEmails(booking: {
   // Admin email
   await transporter.sendMail({
     from: `"Booking System" <${process.env.SMTP_USER}>`,
-    to: 'booking@original-europe-tours.com',
+    to: 'service@beoriginaltours.com',
     subject: `[${booking.bookingRef}] New Booking: ${esc(booking.name)} — ${booking.guests} guests on ${esc(booking.date)}`,
     text: `New booking received!\n\nBooking Ref: ${booking.bookingRef}\n\nTour: Sachsenhausen Memorial Tour\nDate: ${booking.date}\nTime: ${booking.time}\nGuests: ${booking.guests}\nTotal: ${totalDisplay}\n\nCustomer: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'Not provided'}\n\nStripe Payment: ${booking.paymentId}\n`,
   })

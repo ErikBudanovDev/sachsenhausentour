@@ -39,8 +39,8 @@ export function OrganizationSchema({ priceInCents = 2900, currency = 'eur' }: Or
     ],
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: '4.7',
-      reviewCount: '4363',
+      ratingValue: '4.9',
+      reviewCount: '10000',
       bestRating: '5',
       worstRating: '1',
     },

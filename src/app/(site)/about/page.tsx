@@ -69,8 +69,8 @@ function OrganizationSchema() {
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '320',
+      ratingValue: '4.9',
+      reviewCount: '10000',
       bestRating: '5',
     },
     sameAs: [

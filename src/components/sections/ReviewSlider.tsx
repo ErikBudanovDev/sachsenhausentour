@@ -238,10 +238,10 @@ export function ReviewSlider({
   heading,
   subheading,
   reviews,
-  avgRating = '4.7',
-  totalReviews = '4,363',
-  googleCount = '1,667',
-  tripadvisorCount = '2,696',
+  avgRating = '4.9',
+  totalReviews = '10,000+',
+  googleCount = '3,500+',
+  tripadvisorCount = '6,500+',
 }: ReviewSliderProps) {
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [page, setPage] = useState(0)

@@ -144,10 +144,10 @@ export default async function SpanishLandingPage() {
         </div>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { value: '4.8★', label: 'Valoración media' },
+            { value: '4.9★', label: 'Valoración media' },
             { value: '15,000+', label: 'Visitantes guiados' },
             { value: '10+', label: 'Años de experiencia' },
-            { value: '320+', label: 'Reseñas verificadas' },
+            { value: '10,000+', label: 'Reseñas verificadas' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <p className="font-heading text-4xl font-bold text-accent">{stat.value}</p>
@@ -252,8 +252,8 @@ export default async function SpanishLandingPage() {
         heading="Lo Que Dicen Nuestros Visitantes"
         subheading="Reseñas verificadas de visitantes en Google."
         reviews={reviewsData as Review[]}
-        avgRating="4.8"
-        totalReviews="320+"
+        avgRating="4.9"
+        totalReviews="10,000+"
       />
 
       {/* FAQ */}

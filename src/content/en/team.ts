@@ -64,12 +64,12 @@ export const companyHistory: CompanyHistory[] = [
   { year: '2022', event: 'Recognised as a recommended cultural experience by Visit Berlin.' },
   { year: '2023', event: 'Surpassed 10,000 guided visitors at Sachsenhausen Memorial.' },
   { year: '2024', event: 'Partnership with Germany Retold for heritage tourism collaboration.' },
-  { year: '2025', event: '320+ verified reviews with a 4.8-star average across Google and TripAdvisor.' },
+  { year: '2025', event: '10,000+ verified reviews with a 4.9-star average across Google and TripAdvisor.' },
 ]
 
 export const achievements = [
   { value: '15,000+', label: 'Visitors Guided' },
-  { value: '4.8★', label: 'Average Rating' },
-  { value: '320+', label: 'Verified Reviews' },
+  { value: '4.9★', label: 'Average Rating' },
+  { value: '10,000+', label: 'Verified Reviews' },
   { value: '10+', label: 'Years in Berlin' },
 ]
