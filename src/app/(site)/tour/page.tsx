@@ -77,6 +77,64 @@ export default async function TourPage() {
         </div>
       </Section>
 
+      {/* What You'll See */}
+      <Section background="surface" spacing="lg">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-center font-heading text-2xl font-bold">What the Tour Includes</h2>
+          <p className="mt-3 text-center text-text-muted">
+            Your guide will take you through the key sites of the memorial, providing expert historical
+            context at every stop.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {[
+              'The punishment cells',
+              'Gas chambers and Station Z',
+              'Guard Tower A and the camp perimeter',
+              'The roll-call area (Appellplatz)',
+              'Barracks 38 and 39 — prisoner living quarters',
+              'The camp infirmary and medical experimentation rooms',
+              'Detailed tour of the grounds with a licensed guide',
+              'Stories of triumph and tragedy — everyday life in the camp',
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-3 rounded-sm bg-background p-4">
+                <span className="mt-0.5 text-accent">✓</span>
+                <span className="text-sm text-text">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Additional Information */}
+      <Section spacing="lg">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-center font-heading text-2xl font-bold">Additional Information</h2>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            <div className="rounded-sm border border-border p-6">
+              <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">Memorial Donation</p>
+              <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                A €3 per person donation is required when visiting the Memorial. This supports the memorial&apos;s
+                maintenance and will be collected by the guide before entering the camp. Please have exact change ready.
+              </p>
+            </div>
+            <div className="rounded-sm border border-border p-6">
+              <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">Transit Ticket</p>
+              <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                Guests will need a valid ABC transit ticket for the S-Bahn journey from Berlin to Oranienburg and back.
+                Your guide can help with ticket purchase if needed.
+              </p>
+            </div>
+            <div className="rounded-sm border border-border p-6">
+              <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">Food &amp; Drink</p>
+              <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                Bringing a snack and beverage is suggested as limited options are available at the memorial site.
+                The tour lasts approximately 6 hours including travel.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* FAQ */}
       <Section background="surface" spacing="lg">
         <h2 className="mb-8 text-center font-heading text-2xl font-bold">

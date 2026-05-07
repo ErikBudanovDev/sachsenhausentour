@@ -141,19 +141,30 @@ export default async function AboutPage() {
             <h2 className="font-heading text-3xl font-bold">Our Story</h2>
             <div className="mt-6 space-y-4 text-text-muted leading-relaxed">
               <p>
-                Sachsenhausen Tour was founded in 2015 as part of Be Original Tours, a Berlin-based tour company
-                created by a team of historians who believed that memorial visits deserve more than surface-level
-                sightseeing.
+                We offer tours of the Sachsenhausen Concentration Camp Memorial, located just outside Berlin. This
+                site holds great historical significance, and we have been guiding visitors through its past for
+                many years, providing them with the opportunity to learn and reflect on the events that unfolded here.
               </p>
               <p>
-                What started as a single weekly tour has grown into a daily operation that has guided over 15,000
-                visitors through Sachsenhausen Memorial — from students and educators to families and solo travellers
-                from more than 60 countries.
+                What started as a single weekly tour in 2015 has grown into a daily operation that has guided over
+                15,000 visitors through Sachsenhausen Memorial — from students and educators to families and solo
+                travellers from more than 60 countries.
               </p>
               <p>
-                Our guides are not generalists. Every member of our team holds an academic degree in history, Holocaust
-                studies, or a related field, and has undergone specialist training in memorial pedagogy. We invest in
-                ongoing education because the responsibility of telling these stories demands nothing less.
+                Our guides are experienced and deeply knowledgeable about the history of the camp. They take visitors
+                through the site, offering clear and respectful explanations about its past. Each guide is committed
+                to presenting the facts in a way that allows visitors to understand and reflect on the gravity of
+                what took place at Sachsenhausen.
+              </p>
+              <p>
+                The history of Sachsenhausen is a heavy one, but it is crucial that it is shared with future
+                generations. Our tours provide a chance to understand the events that took place here, the suffering
+                endured, and the lessons that can be drawn from this dark chapter in history.
+              </p>
+              <p>
+                Our approach is never about entertainment, but about education and remembrance. We have learned that
+                the best way to understand history is through a direct and respectful approach — ensuring the memory
+                of those who suffered here is not forgotten.
               </p>
             </div>
           </div>
